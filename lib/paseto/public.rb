@@ -14,8 +14,7 @@ module Paseto
     end
 
     def initialize(private_key, footer = nil)
-      @private_key = private_key
-      @signing_key = RbNaCl::SigningKey.new(@private_key)
+      @signing_key = RbNaCl::SigningKey.new(private_key)
       @verify_key = @signing_key.verify_key
       @footer = footer
     end
