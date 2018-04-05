@@ -39,7 +39,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 1.16)
   paseto!
-  pry
+  pry (~> 0.11)
   rake (~> 10.0)
   rspec (~> 3.0)
 

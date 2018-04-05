@@ -1,8 +1,6 @@
 # Paseto
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/paseto`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Ruby implement of [Paseto](https://github.com/paragonie/paseto) using [libsodium](https://github.com/crypto-rb/rbnacl).
 
 ## Installation
 
@@ -22,7 +20,26 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+## Public Signing
+
+    require 'paseto'
+    key = Paseto::Public.generate_signing_key
+    public = Paseto::Public.new(key)
+    signed_msg = public.sign('a fancy message')
+    public.verify(signed_msg) == true
+
+## Local encryption
+
+    require 'paseto'
+    key = Paseto::Local.generate_aead_key
+    local = Paseto::Local.new(key)
+    encrypted_msg = local.encrypt('a fancy message')
+    local.decrypt(encrypted_msg) == 'a fancy message'
+
+## Using a Base64 key
+
+    key = Paseto.encode64(Paseto::Public.generate_signing_key)
+    public = Paseto::Public.from_encode64_key(key)
 
 ## Development
 
