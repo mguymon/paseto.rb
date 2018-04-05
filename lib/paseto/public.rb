@@ -1,5 +1,3 @@
-require 'rbnacl'
-
 module Paseto
   class Public
     HEADER = 'v2.public'
