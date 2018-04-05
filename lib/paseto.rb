@@ -39,6 +39,7 @@ module Paseto
   end
 
   def self.encode64(bin)
+    # Remove the padding on the encode64
     Base64.strict_encode64(bin).gsub(/=+$/, '')
   end
 
@@ -48,6 +49,7 @@ module Paseto
     encoded_footer = encode64(footer)
     raise Paseto::Error.new('Invalid message footer') unless payload.end_with? encoded_footer
 
+    # remove the footer plus the period separater
     payload[0..-(encoded_footer.length + 2)]
   end
 end
