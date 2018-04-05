@@ -1,6 +1,6 @@
 # Paseto
 
-Ruby implement of [Paseto](https://github.com/paragonie/paseto) using [libsodium](https://github.com/crypto-rb/rbnacl).
+Ruby implementation of [Paseto](https://github.com/paragonie/paseto) using [libsodium](https://github.com/crypto-rb/rbnacl) that supports [Version 2](https://github.com/paragonie/paseto/blob/master/docs/01-Protocol-Versions/Version2.md).
 
 ## Installation
 
