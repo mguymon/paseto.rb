@@ -7,13 +7,16 @@ module Paseto
 
     BadMessageError = Class.new(Paseto::Error)
 
-    def initialize(private_key, footer = nil)
-      if private_key.is_a? String
-        @private_key = Paseto.decode64(private_key)
-      else
-        @private_key = private_key
-      end
+    def self.generate_signing_key
+      RbNaCl::SigningKey.generate
+    end
 
+    def self.from_encode64_key(encoded_key, footer = nil)
+      new(Paseto.decode64(encoded_key), footer)
+    end
+
+    def initialize(private_key, footer = nil)
+      @private_key = private_key
       @signing_key = RbNaCl::SigningKey.new(@private_key)
       @verify_key = @signing_key.verify_key
       @footer = footer

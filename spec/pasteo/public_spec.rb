@@ -1,5 +1,5 @@
 RSpec.describe Paseto::Public do
-  subject { described_class.new(key, footer) }
+  subject { described_class.from_encode64_key(key, footer) }
 
   let(:key) { 'KxltS+uXOrPh5ZV2cwECjkcBrXbhTOaqQgg93j6FZ0w' }
   let(:footer) { nil }

@@ -7,17 +7,20 @@ module Paseto
     AuthError = Class.new(Paseto::Error)
     BadMessageError = Class.new(Paseto::Error)
 
+    def self.generate_aead_key
+      RbNaCl::Random.random_bytes(RbNaCl::AEAD::ChaCha20Poly1305IETF.key_bytes)
+    end
+
     def self.generate_nonce
       RbNaCl::Random.random_bytes(NONCE_BYTES)
     end
 
-    def initialize(private_key, footer = [])
-      if private_key.is_a? String
-        @private_key = Paseto.decode64(private_key)
-      else
-        @private_key = private_key
-      end
+    def self.from_encode64_key(encoded_key, footer = nil)
+      new(Paseto.decode64(encoded_key), footer)
+    end
 
+    def initialize(private_key, footer = nil)
+      @private_key = private_key
       @aead = RbNaCl::AEAD::ChaCha20Poly1305IETF.new(@private_key)
       @footer = footer
     end
