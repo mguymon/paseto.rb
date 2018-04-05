@@ -20,8 +20,7 @@ module Paseto
     end
 
     def initialize(private_key, footer = nil)
-      @private_key = private_key
-      @aead = RbNaCl::AEAD::ChaCha20Poly1305IETF.new(@private_key)
+      @aead = RbNaCl::AEAD::ChaCha20Poly1305IETF.new(private_key)
       @footer = footer
     end
 
