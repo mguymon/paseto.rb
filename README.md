@@ -1,6 +1,10 @@
 # Paseto
 
-Ruby implement of [Paseto](https://github.com/paragonie/paseto) using [libsodium](https://github.com/crypto-rb/rbnacl).
+![](https://travis-ci.org/mguymon/paseto.rb.svg?branch=master)
+
+Ruby implementation of [Paseto](https://github.com/paragonie/paseto) using [libsodium](https://github.com/crypto-rb/rbnacl) that supports [Version 2](https://github.com/paragonie/paseto/blob/master/docs/01-Protocol-Versions/Version2.md).
+
+> Paseto (Platform-Agnostic SEcurity TOkens) is a specification for secure stateless tokens.
 
 ## Installation
 
