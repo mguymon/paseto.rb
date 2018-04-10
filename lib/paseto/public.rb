@@ -28,13 +28,10 @@ module Paseto
     end
 
     def verify(token)
-      raise Paseto::BadHeaderError.new('Invalid message header.') unless token.start_with?(HEADER)
+      parsed = Paseto.parse_raw_token(token, HEADER)
 
-      computed_msg = Paseto.validate_and_remove_footer(token, @footer)
-      decoded_payload = Paseto.decode64(computed_msg[10..-1]);
-
-      decoded_message = decoded_payload[0..-(SIGNATURE_BYTES + 1)]
-      signature = decoded_payload[-SIGNATURE_BYTES..-1]
+      decoded_message = parsed.payload[0..-(SIGNATURE_BYTES + 1)]
+      signature = parsed.payload[-SIGNATURE_BYTES..-1]
 
       raise BadMessageError.new('Unable to process message') if decoded_message.nil? || signature.nil?
 

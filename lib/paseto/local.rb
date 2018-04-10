@@ -29,23 +29,21 @@ module Paseto
       nonce = self.class.generate_nonce
 
       # Encrypt a message with the AEAD
-      ciphertext = @aead.encrypt(nonce, message, additional_data(nonce))
+      ciphertext = @aead.encrypt(nonce, message, additional_data(nonce, @footer))
 
       Paseto::Token.new(HEADER, nonce + ciphertext, @footer).to_message
     end
 
     def decrypt(token)
-      raise Paseto::BadHeaderError.new('Invalid message header.') unless token.start_with?(HEADER)
+      parsed = Paseto.parse_raw_token(token, HEADER)
 
-      computed_msg = Paseto.validate_and_remove_footer(token, @footer)
-      decoded_payload = Paseto.decode64(computed_msg[9..-1]);
-      nonce = decoded_payload[0, NONCE_BYTES]
-      ciphertext = decoded_payload[NONCE_BYTES..-1]
+      nonce = parsed.payload[0, NONCE_BYTES]
+      ciphertext = parsed.payload[NONCE_BYTES..-1]
 
       raise BadMessageError.new('Unable to process message') if nonce.nil? || ciphertext.nil?
 
       begin
-        @aead.decrypt(nonce, ciphertext, additional_data(nonce))
+        @aead.decrypt(nonce, ciphertext, additional_data(nonce, parsed.footer))
       rescue RbNaCl::LengthError
         raise NonceError, 'Invalid nonce'
       rescue RbNaCl::CryptoError
@@ -55,8 +53,8 @@ module Paseto
       end
     end
 
-    def additional_data(nonce)
-      Paseto.pre_auth_encode(HEADER, nonce, @footer)
+    def additional_data(nonce, footer)
+      Paseto.pre_auth_encode(HEADER, nonce, footer)
     end
   end
 end
