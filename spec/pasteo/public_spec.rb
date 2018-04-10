@@ -1,3 +1,5 @@
+require 'securerandom'
+
 RSpec.describe Paseto::Public do
   subject { described_class.from_encode64_key(key, footer) }
 
