@@ -1,5 +1,5 @@
 module Paseto
-  Message = Struct.new(:header, :payload, :footer) do
+  Token = Struct.new(:header, :payload, :footer) do
     def to_message
       message = [
         header,

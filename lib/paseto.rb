@@ -3,7 +3,7 @@ require 'rbnacl/libsodium'
 
 require 'paseto/version'
 require 'paseto/error'
-require 'paseto/message'
+require 'paseto/token'
 require 'paseto/public'
 require 'paseto/local'
 

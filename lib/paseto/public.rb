@@ -19,18 +19,18 @@ module Paseto
       @footer = footer
     end
 
-    def sign(payload)
-      data = encode_message(payload)
+    def sign(message)
+      data = encode_message(message)
       # Sign a message with the signing key
       signature = @signing_key.sign(data)
 
-      Paseto::Message.new(HEADER, data + signature, @footer).to_message
+      Paseto::Token.new(HEADER, data + signature, @footer).to_message
     end
 
-    def verify(message)
-      raise Paseto::BadHeaderError.new('Invalid message header.') unless message.start_with?(HEADER)
+    def verify(token)
+      raise Paseto::BadHeaderError.new('Invalid message header.') unless token.start_with?(HEADER)
 
-      computed_msg = Paseto.validate_and_remove_footer(message, @footer)
+      computed_msg = Paseto.validate_and_remove_footer(token, @footer)
       decoded_payload = Paseto.decode64(computed_msg[10..-1]);
 
       decoded_message = decoded_payload[0..-(SIGNATURE_BYTES + 1)]

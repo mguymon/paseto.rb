@@ -31,13 +31,13 @@ module Paseto
       # Encrypt a message with the AEAD
       ciphertext = @aead.encrypt(nonce, message, additional_data(nonce))
 
-      Paseto::Message.new(HEADER, nonce + ciphertext, @footer).to_message
+      Paseto::Token.new(HEADER, nonce + ciphertext, @footer).to_message
     end
 
-    def decrypt(message)
-      raise Paseto::BadHeaderError.new('Invalid message header.') unless message.start_with?(HEADER)
+    def decrypt(token)
+      raise Paseto::BadHeaderError.new('Invalid message header.') unless token.start_with?(HEADER)
 
-      computed_msg = Paseto.validate_and_remove_footer(message, @footer)
+      computed_msg = Paseto.validate_and_remove_footer(token, @footer)
       decoded_payload = Paseto.decode64(computed_msg[9..-1]);
       nonce = decoded_payload[0, NONCE_BYTES]
       ciphertext = decoded_payload[NONCE_BYTES..-1]
