@@ -43,13 +43,9 @@ module Paseto
     Base64.strict_encode64(bin).gsub(/=+$/, '')
   end
 
-  def self.validate_and_remove_footer(payload, footer)
-    return payload if (footer == nil || footer == '')
-
-    encoded_footer = encode64(footer)
-    raise Paseto::Error.new('Invalid message footer') unless payload.end_with? encoded_footer
-
-    # remove the footer plus the period separater
-    payload[0..-(encoded_footer.length + 2)]
+  # See https://github.com/paragonie/paseto/issues/53 for why this might be
+  # useful.
+  def self.read_unauthenticated_footer(raw)
+    parse_raw_token(raw).footer
   end
 end
