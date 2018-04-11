@@ -2,7 +2,7 @@
 
 ![](https://travis-ci.org/mguymon/paseto.rb.svg?branch=master)
 
-Ruby implementation of [Paseto](https://github.com/paragonie/paseto) using [libsodium](https://github.com/crypto-rb/rbnacl) that supports [Version 2](https://github.com/paragonie/paseto/blob/master/docs/01-Protocol-Versions/Version2.md).
+Ruby implementation of [Paseto](https://github.com/paragonie/paseto) using [libsodium](https://github.com/crypto-rb/rbnacl) that currently only supports [Version 2](https://github.com/paragonie/paseto/blob/master/docs/01-Protocol-Versions/Version2.md).
 
 > Paseto (Platform-Agnostic SEcurity TOkens) is a specification for secure stateless tokens.
 
@@ -24,26 +24,44 @@ Or install it yourself as:
 
 ## Usage
 
-## Public Signing
+For all examples:
 
     require 'paseto'
-    key = Paseto::Public.generate_signing_key
-    public = Paseto::Public.new(key)
-    signed_msg = public.sign('a fancy message')
-    public.verify(signed_msg) == true
 
-## Local encryption
+## Signing Plaintext Public Messages
 
-    require 'paseto'
-    key = Paseto::Local.generate_aead_key
-    local = Paseto::Local.new(key)
-    encrypted_msg = local.encrypt('a fancy message')
-    local.decrypt(encrypted_msg) == 'a fancy message'
+    Public = Paseto::V2::Public
+    key = Public::SecretKey.generate
+    token = Public.sign('too many secrets', key)
 
-## Using a Base64 key
+    saved_key = key.public_key.encode64 # you can save this string to a db
+    decoded_key = Public::PublicKey.decode64(saved_key)
+    Public.verify(token, decoded_key) # => 'too many secrets'
 
-    key = Paseto.encode64(Paseto::Public.generate_signing_key)
-    public = Paseto::Public.from_encode64_key(key)
+## Encrypting Messages with a Shared Secret
+
+    Local = Paseto::V2::Local
+    key = Local::Key.generate
+    token = Local.encrypt('a fancy message', key)
+
+    saved_key = key.encode64 # a base64 string representation of the key
+    decoded_key = Local::Key.decode64(saved_key)
+    Local.decrypt(token, decoded_key) # => 'a fancy message'
+
+## Using the Message Footer
+
+The message footer is transmitted plaintext, and can be used for key lookup.
+Note that you always must still verify the token, as this also verifies the
+integrity of the footer:
+
+    Local = Paseto::V2::Local
+    footer = Paseto.read_unauthenticated_footer(token)
+    kid = footer
+    saved_key = database.find_key(kid) # find the previously stored key
+    decoded_key = Local::Key.decode64(saved_key)
+
+    # you *must* pass in the third (footer) parameter here!
+    Local.decrypt(token, decoded_key, footer) # => 'too many secrets'
 
 ## Development
 
