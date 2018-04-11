@@ -42,19 +42,27 @@ RSpec.describe Paseto::Public do
     end
 
     it 'should raise an error for a bad header' do
-      expect { subject.verify("incorrect.header") }.to raise_error Paseto::BadHeaderError
+      expect { subject.verify("incorrect.header") }.to raise_error Paseto::HeaderError
     end
 
     it 'should raise error trying to decrypt junk' do
       expect { subject.verify("v2.public." + SecureRandom.hex) }.to raise_error Paseto::Error
     end
 
+    it 'should allow access to the signed payload' do
+      expect(subject.verify(signed_message)).to eq('test')
+    end
+
     context 'with a footer' do
       let(:footer) { 'plain text footer' }
-      let(:result) { subject.verify(signed_message_with_footer) }
+      let(:bad_footer) { described_class.from_encode64_key(key, 'other foot') }
 
-      it 'should allow access to the signed payload' do
-        expect(result).to eq('test')
+      it "should verify when the footer matches what's expected" do
+        expect(subject.verify(signed_message_with_footer)).to eq('test')
+      end
+
+      it "should raise when the footer doesn't match what's expected" do
+        expect { bad_footer.verify(signed_message_with_footer) }.to raise_error Paseto::TokenError
       end
     end
   end

@@ -4,7 +4,6 @@ module Paseto
     NONCE_BYTES = RbNaCl::AEAD::ChaCha20Poly1305IETF.nonce_bytes
 
     NonceError = Class.new(Paseto::Error)
-    BadMessageError = Class.new(Paseto::Error)
 
     def self.generate_aead_key
       RbNaCl::Random.random_bytes(RbNaCl::AEAD::ChaCha20Poly1305IETF.key_bytes)
@@ -34,7 +33,7 @@ module Paseto
     end
 
     def decrypt(token)
-      parsed = Paseto.parse_raw_token(token, HEADER)
+      parsed = Paseto.parse_raw_token(token, HEADER, @footer)
 
       nonce = parsed.payload[0, NONCE_BYTES]
       ciphertext = parsed.payload[NONCE_BYTES..-1]
@@ -42,13 +41,14 @@ module Paseto
       raise BadMessageError.new('Unable to process message') if nonce.nil? || ciphertext.nil?
 
       begin
-        @aead.decrypt(nonce, ciphertext, additional_data(nonce, parsed.footer))
+        data = additional_data(nonce, parsed.footer)
+        @aead.decrypt(nonce, ciphertext, data)
       rescue RbNaCl::LengthError
         raise NonceError, 'Invalid nonce'
       rescue RbNaCl::CryptoError
         raise AuthenticationError, 'Token signature invalid'
       rescue
-        raise BadMessageError, 'Unable to process message'
+        raise TokenError, 'Unable to process message'
       end
     end
 
