@@ -1,34 +1,62 @@
 module Paseto
-  class Public
+  module Public
     HEADER = 'v2.public'
     SIGNATURE_BYTES = RbNaCl::SigningKey.signature_bytes
 
     BadMessageError = Class.new(Paseto::Error)
 
-    def self.generate_signing_key
-      RbNaCl::SigningKey.generate
+    class SecretKey
+      def self.generate
+        new(RbNaCl::SigningKey.generate)
+      end
+
+      def self.decode64(encoded_key)
+        new(Paseto.decode64(encoded_key))
+      end
+
+      def initialize(key)
+        @key = key
+        @nacl = RbNaCl::SigningKey.new(key)
+      end
+
+      def public_key
+        PublicKey.new(@nacl.verify_key.to_bytes)
+      end
+
+      def encode64
+        Paseto.encode64(@key)
+      end
+
+      attr_reader :nacl
     end
 
-    def self.from_encode64_key(encoded_key, footer = nil)
-      new(Paseto.decode64(encoded_key), footer)
+    class PublicKey
+      def self.decode64(encoded_key)
+        new(Paseto.decode64(encoded_key))
+      end
+
+      def initialize(key)
+        @key = key
+        @nacl = RbNaCl::VerifyKey.new(key)
+      end
+
+      def encode64
+        Paseto.encode64(@key)
+      end
+
+      attr_reader :nacl
     end
 
-    def initialize(private_key, footer = nil)
-      @signing_key = RbNaCl::SigningKey.new(private_key)
-      @verify_key = @signing_key.verify_key
-      @footer = footer
-    end
-
-    def sign(message)
-      data = encode_message(message)
+    def self.sign(message, key, footer = nil)
+      data = encode_message(message, footer)
       # Sign a message with the signing key
-      signature = @signing_key.sign(data)
+      signature = key.nacl.sign(data)
 
-      Paseto::Token.new(HEADER, message + signature, @footer).to_message
+      Paseto::Token.new(HEADER, message + signature, footer).to_message
     end
 
-    def verify(token)
-      parsed = Paseto.parse_raw_token(token, HEADER, @footer)
+    def self.verify(token, key, footer = nil)
+      parsed = Paseto.parse_raw_token(token, HEADER, footer)
 
       decoded_message = parsed.payload[0..-(SIGNATURE_BYTES + 1)]
       signature = parsed.payload[-SIGNATURE_BYTES..-1]
@@ -36,8 +64,9 @@ module Paseto
       raise BadMessageError.new('Unable to process message') if decoded_message.nil? || signature.nil?
 
       begin
-        data = encode_message(decoded_message)
-        @verify_key.verify(signature, data)
+        key = key.public_key if key.is_a? SecretKey
+        data = encode_message(decoded_message, footer)
+        key.nacl.verify(signature, data)
         decoded_message
       rescue RbNaCl::BadSignatureError
         raise AuthenticationError.new('Token signature invalid')
@@ -46,8 +75,8 @@ module Paseto
 
     private
 
-    def encode_message(message)
-      Paseto.pre_auth_encode(HEADER, message, @footer)
+    def self.encode_message(message, footer)
+      Paseto.pre_auth_encode(HEADER, message, footer)
     end
   end
 end
