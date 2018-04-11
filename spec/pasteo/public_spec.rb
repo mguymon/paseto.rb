@@ -38,7 +38,7 @@ RSpec.describe Paseto::Public do
     end
 
     it 'should reject a bad signature' do
-      expect(subject.verify(bad_message)).to be_falsey
+      expect { subject.verify(bad_message) }.to raise_error Paseto::AuthenticationError
     end
 
     it 'should raise an error for a bad header' do
@@ -51,9 +51,10 @@ RSpec.describe Paseto::Public do
 
     context 'with a footer' do
       let(:footer) { 'plain text footer' }
+      let(:result) { subject.verify(signed_message_with_footer) }
 
-      it 'should sign a message' do
-        expect(subject.verify(signed_message_with_footer)).to be_truthy
+      it 'should allow access to the signed payload' do
+        expect(result).to eq('test')
       end
     end
   end

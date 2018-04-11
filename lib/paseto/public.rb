@@ -38,9 +38,9 @@ module Paseto
       begin
         data = encode_message(decoded_message)
         @verify_key.verify(signature, data)
-        true
+        decoded_message
       rescue RbNaCl::BadSignatureError
-        false
+        raise AuthenticationError.new('Token signature invalid')
       end
     end
 

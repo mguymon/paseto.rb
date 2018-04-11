@@ -4,7 +4,6 @@ module Paseto
     NONCE_BYTES = RbNaCl::AEAD::ChaCha20Poly1305IETF.nonce_bytes
 
     NonceError = Class.new(Paseto::Error)
-    AuthError = Class.new(Paseto::Error)
     BadMessageError = Class.new(Paseto::Error)
 
     def self.generate_aead_key
@@ -47,7 +46,7 @@ module Paseto
       rescue RbNaCl::LengthError
         raise NonceError, 'Invalid nonce'
       rescue RbNaCl::CryptoError
-        raise AuthError, 'Message cannot be authenticated'
+        raise AuthenticationError, 'Token signature invalid'
       rescue
         raise BadMessageError, 'Unable to process message'
       end
