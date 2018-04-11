@@ -29,8 +29,7 @@ RSpec.describe Paseto do
 
   describe '#read_unauthenticated_footer' do
     it 'can read a message footer without a key' do
-      v = Paseto::Local.new(Paseto::Local.generate_aead_key, 'hello there')
-      token = v.encrypt('message')
+      token = Paseto::Local.encrypt('message', Paseto::Local::Key.generate, 'hello there')
       expect(described_class.read_unauthenticated_footer(token)).to eq('hello there')
     end
   end
