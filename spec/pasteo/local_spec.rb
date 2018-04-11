@@ -1,18 +1,18 @@
 require 'securerandom'
 
-RSpec.describe Paseto::Local do
+RSpec.describe Paseto::V2::Local do
   subject { described_class }
 
   let(:payload) { 'test' }
   let(:encoded_key) { '2eOIs+JWWCKvFDg+eHFsIBHfMuN+3bqkceK8moM4S1Y' }
-  let(:key) { Paseto::Local::Key.decode64(encoded_key) }
+  let(:key) { Paseto::V2::Local::Key.decode64(encoded_key) }
   let(:footer) { nil }
   let(:token) { 'v2.local.6EHOXWuFHUBNy9gEB8sSU5NTF83oMagI/j89rE26Wmk' }
   let(:nonce) { '6EHOXWuFHUBNy9gE' }
 
   before { allow(described_class).to receive(:generate_nonce).and_return(Paseto.decode64(nonce)) }
 
-  describe Paseto::Local::Key do
+  describe Paseto::V2::Local::Key do
     subject { described_class }
 
     it '.encode64 returns a base64-encoded key' do

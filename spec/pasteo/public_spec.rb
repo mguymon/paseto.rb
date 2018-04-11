@@ -1,12 +1,12 @@
 require 'securerandom'
 
-RSpec.describe Paseto::Public do
+RSpec.describe Paseto::V2::Public do
   subject { described_class }
 
   let(:encoded_secret_key) { 'KxltS+uXOrPh5ZV2cwECjkcBrXbhTOaqQgg93j6FZ0w' }
-  let(:secret_key) { Paseto::Public::SecretKey.decode64(encoded_secret_key) }
+  let(:secret_key) { Paseto::V2::Public::SecretKey.decode64(encoded_secret_key) }
   let(:encoded_public_key) { 'J3caURidJMcqSGLd4iTznFvOMqM1qv5mwFuzRfWBGZU' }
-  let(:public_key) { Paseto::Public::PublicKey.decode64(encoded_public_key) }
+  let(:public_key) { Paseto::V2::Public::PublicKey.decode64(encoded_public_key) }
   let(:footer) { nil }
 
   let(:signed_message) do
@@ -34,13 +34,13 @@ RSpec.describe Paseto::Public do
     end
   end
 
-  describe Paseto::Public::SecretKey do
+  describe Paseto::V2::Public::SecretKey do
     it 'can encode key material' do
       expect(secret_key.encode64).to eq(encoded_secret_key)
     end
   end
 
-  describe Paseto::Public::SecretKey do
+  describe Paseto::V2::Public::SecretKey do
     it 'can encode key material' do
       expect(public_key.encode64).to eq(encoded_public_key)
     end
