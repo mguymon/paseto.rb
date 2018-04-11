@@ -7,15 +7,15 @@ RSpec.describe Paseto::Public do
   let(:footer) { nil }
 
   let(:signed_message) do
-    'v2.public.AgAAAAAAAAAJAAAAAAAAAHYyLnB1YmxpYwQAAAAAAAAAdGVzdBRCVsCf+slzp0+MikU4+sxDF6S5xcho1GMyoNr/4gacdYdjSJ30W6GHnQdEPXam1LxIrN7i0qSn1ZUlUcbQQQg'
-  end
-
-  let(:signed_mesage_with_footer) do
-    'v2.public.AwAAAAAAAAAJAAAAAAAAAHYyLnB1YmxpYwQAAAAAAAAAdGVzdBEAAAAAAAAAcGxhaW4gdGV4dCBmb290ZXL2X58Xw0sPL7j6EWnk2qPodZ4W59HtdBlEhAbW2x82uiz3VCgKZuWKK6IURijts3b2rolWwCoIsS4yrV8WAu8N.cGxhaW4gdGV4dCBmb290ZXI'
+    'v2.public.dGVzdBRCVsCf+slzp0+MikU4+sxDF6S5xcho1GMyoNr/4gacdYdjSJ30W6GHnQdEPXam1LxIrN7i0qSn1ZUlUcbQQQg'
   end
 
   let(:bad_message) do
-    'v2.public.AgAAAAAAAAAJAAAAAAAAAHYyLnB1YmxpYwMAAAAAAAAAYmFk_ss6VBLy-32gO6mH3tPwHH3wn-VPGmW1ZkE6IU2lZqaVcldxp5th-_PVR5B2ZOmGodQBRTb6xwue77AgqBw1Dw'
+    'v2.public.cGVzdBRCVsCf+slzp0+MikU4+sxDF6S5xcho1GMyoNr/4gacdYdjSJ30W6GHnQdEPXam1LxIrN7i0qSn1ZUlUcbQQQg'
+  end
+
+  let(:signed_message_with_footer) do
+    'v2.public.dGVzdPZfnxfDSw8vuPoRaeTao+h1nhbn0e10GUSEBtbbHza6LPdUKApm5YorohRGKO2zdvauiVbAKgixLjKtXxYC7w0.cGxhaW4gdGV4dCBmb290ZXI'
   end
 
   describe '#sign' do
@@ -27,7 +27,7 @@ RSpec.describe Paseto::Public do
       let(:footer) { 'plain text footer' }
 
       it 'should sign a message' do
-        expect(subject.sign('test')).to eq signed_mesage_with_footer
+        expect(subject.sign('test')).to eq signed_message_with_footer
       end
     end
   end
@@ -46,14 +46,14 @@ RSpec.describe Paseto::Public do
     end
 
     it 'should raise error trying to decrypt junk' do
-      expect { subject.verify("v2.public." + SecureRandom.hex ) }.to raise_error Paseto::Error
+      expect { subject.verify("v2.public." + SecureRandom.hex) }.to raise_error Paseto::Error
     end
 
     context 'with a footer' do
       let(:footer) { 'plain text footer' }
 
       it 'should sign a message' do
-        expect(subject.verify(signed_mesage_with_footer)).to be_truthy
+        expect(subject.verify(signed_message_with_footer)).to be_truthy
       end
     end
   end

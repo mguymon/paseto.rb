@@ -24,7 +24,7 @@ module Paseto
       # Sign a message with the signing key
       signature = @signing_key.sign(data)
 
-      Paseto::Token.new(HEADER, data + signature, @footer).to_message
+      Paseto::Token.new(HEADER, message + signature, @footer).to_message
     end
 
     def verify(token)
@@ -36,7 +36,9 @@ module Paseto
       raise BadMessageError.new('Unable to process message') if decoded_message.nil? || signature.nil?
 
       begin
-        @verify_key.verify(signature, decoded_message)
+        data = encode_message(decoded_message)
+        @verify_key.verify(signature, data)
+        true
       rescue RbNaCl::BadSignatureError
         false
       end
