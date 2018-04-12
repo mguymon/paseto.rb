@@ -42,10 +42,4 @@ module Paseto
     # Remove the padding on the encode64
     Base64.strict_encode64(bin).gsub(/=+$/, '')
   end
-
-  # See https://github.com/paragonie/paseto/issues/53 for why this might be
-  # useful.
-  def self.read_unauthenticated_footer(raw)
-    parse_raw_token(raw).footer
-  end
 end
