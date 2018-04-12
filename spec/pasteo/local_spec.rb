@@ -16,12 +16,6 @@ RSpec.describe Paseto::V2::Local do
     it '.encode64 returns a base64-encoded key' do
       expect(key.encode64).to eq(encoded_key)
     end
-
-    it '.decode64(key.encode64) is a no-op' do
-      key = subject.generate
-      round_trip = subject.decode64(key.encode64)
-      expect(round_trip.instance_variable_get(:@key)).to eq(key.instance_variable_get(:@key))
-    end
   end
 
   describe '.encrypt' do
