@@ -32,21 +32,21 @@ For all examples:
 
     Public = Paseto::V2::Public
     key = Public::SecretKey.generate
-    token = Public.sign('too many secrets', key)
+    token = key.sign('too many secrets')
 
     saved_key = key.public_key.encode64 # you can save this string to a db
     decoded_key = Public::PublicKey.decode64(saved_key)
-    Public.verify(token, decoded_key) # => 'too many secrets'
+    decoded_key.verify(token) # => 'too many secrets'
 
 ## Encrypting Messages with a Shared Secret
 
-    Local = Paseto::V2::Local
+    Key = Paseto::V2::Local::Key
     key = Local::Key.generate
-    token = Local.encrypt('a fancy message', key)
+    token = key.encrypt('a fancy message')
 
     saved_key = key.encode64 # a base64 string representation of the key
     decoded_key = Local::Key.decode64(saved_key)
-    Local.decrypt(token, decoded_key) # => 'a fancy message'
+    decoded_key.decrypt(token) # => 'a fancy message'
 
 ## Using the Message Footer
 
@@ -61,7 +61,7 @@ integrity of the footer:
     decoded_key = Local::Key.decode64(saved_key)
 
     # you *must* pass in the third (footer) parameter here!
-    Local.decrypt(token, decoded_key, footer) # => 'too many secrets'
+    decoded_key.decrypt(token, footer) # => 'too many secrets'
 
 ## Development
 

@@ -24,45 +24,53 @@ module Paseto
           Paseto.encode64(@key)
         end
 
-        attr_reader :aead
-      end
+        def encrypt(message, footer = nil)
+          # Make a nonce: A single-use value never repeated under the same key
+          nonce = generate_nonce
 
-      def self.generate_nonce
-        RbNaCl::Random.random_bytes(NONCE_BYTES)
-      end
+          # Encrypt a message with the AEAD
+          ciphertext = @aead.encrypt(nonce, message, additional_data(nonce, footer))
 
-      def self.encrypt(message, key, footer = nil)
-        # Make a nonce: A single-use value never repeated under the same key
-        nonce = generate_nonce
+          Paseto::Token.new(HEADER, nonce + ciphertext, footer).to_message
+        end
 
-        # Encrypt a message with the AEAD
-        ciphertext = key.aead.encrypt(nonce, message, additional_data(nonce, footer))
+        def decrypt(token, footer = nil)
+          parsed = Paseto.parse_raw_token(token, HEADER, footer)
 
-        Paseto::Token.new(HEADER, nonce + ciphertext, footer).to_message
-      end
+          nonce = parsed.payload[0, NONCE_BYTES]
+          ciphertext = parsed.payload[NONCE_BYTES..-1]
 
-      def self.decrypt(token, key, footer = nil)
-        parsed = Paseto.parse_raw_token(token, HEADER, footer)
+          raise BadMessageError.new('Unable to process message') if nonce.nil? || ciphertext.nil?
 
-        nonce = parsed.payload[0, NONCE_BYTES]
-        ciphertext = parsed.payload[NONCE_BYTES..-1]
+          begin
+            data = additional_data(nonce, footer)
+            @aead.decrypt(nonce, ciphertext, data)
+          rescue RbNaCl::LengthError
+            raise NonceError, 'Invalid nonce'
+          rescue RbNaCl::CryptoError
+            raise AuthenticationError, 'Token signature invalid'
+          rescue
+            raise TokenError, 'Unable to process message'
+          end
+        end
 
-        raise BadMessageError.new('Unable to process message') if nonce.nil? || ciphertext.nil?
+        private
 
-        begin
-          data = additional_data(nonce, footer)
-          key.aead.decrypt(nonce, ciphertext, data)
-        rescue RbNaCl::LengthError
-          raise NonceError, 'Invalid nonce'
-        rescue RbNaCl::CryptoError
-          raise AuthenticationError, 'Token signature invalid'
-        rescue
-          raise TokenError, 'Unable to process message'
+        def generate_nonce
+          RbNaCl::Random.random_bytes(NONCE_BYTES)
+        end
+
+        def additional_data(nonce, footer)
+          Paseto.pre_auth_encode(HEADER, nonce, footer)
         end
       end
 
-      def self.additional_data(nonce, footer)
-        Paseto.pre_auth_encode(HEADER, nonce, footer)
+      def self.encrypt(message, key, footer = nil)
+        key.encrypt(message, footer)
+      end
+
+      def self.decrypt(token, key, footer = nil)
+        key.decrypt(token, footer)
       end
     end
   end

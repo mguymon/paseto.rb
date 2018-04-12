@@ -10,8 +10,6 @@ RSpec.describe Paseto::V2::Local do
   let(:token) { 'v2.local.6EHOXWuFHUBNy9gEB8sSU5NTF83oMagI/j89rE26Wmk' }
   let(:nonce) { '6EHOXWuFHUBNy9gE' }
 
-  before { allow(described_class).to receive(:generate_nonce).and_return(Paseto.decode64(nonce)) }
-
   describe Paseto::V2::Local::Key do
     subject { described_class }
 
@@ -28,6 +26,9 @@ RSpec.describe Paseto::V2::Local do
 
   describe '.encrypt' do
     it 'should encrypt the message' do
+      allow_any_instance_of(described_class::Key).to receive(:generate_nonce)
+        .and_return(Paseto.decode64(nonce))
+
       expect(subject.encrypt(payload, key)).to eq token
     end
   end
