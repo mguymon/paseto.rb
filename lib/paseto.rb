@@ -13,11 +13,11 @@ module Paseto
   def self.encode_length(n)
     str = []
     (0..7).each do |i|
-        # Clear the MSB for interoperability
-        n &= 127 if (i === 7)
+      # Clear the MSB for interoperability
+      n &= 127 if (i === 7)
 
-        str << (n & 255)
-        n = n >> 8
+      str << (n & 255)
+      n = n >> 8
     end
 
     str.pack('Q')
@@ -29,8 +29,8 @@ module Paseto
 
     initial_output = encode_length(compacted_pieces.length)
     compacted_pieces.reduce(initial_output) do |output, piece|
-        output += encode_length(piece.length)
-        output += piece
+      output += encode_length(piece.length)
+      output += piece
     end
   end
 
