@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    paseto (0.1.0)
+    paseto (0.2.0)
       rbnacl-libsodium (~> 1.0)
 
 GEM
