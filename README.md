@@ -55,13 +55,15 @@ Note that you always must still verify the token, as this also verifies the
 integrity of the footer:
 
     Local = Paseto::V2::Local
-    footer = Paseto.read_unauthenticated_footer(token)
-    kid = footer
+    token = Paseto.parse(raw_data)
+    # NOTE: this has not yet been verified! You will always want to call
+    # .decrypt or .verify *immediately* after using this value. Otherwise, you
+    # will be using data that has not been authenticated.
+    kid = token.footer
+
     saved_key = database.find_key(kid) # find the previously stored key
     decoded_key = Local::Key.decode64(saved_key)
-
-    # you *must* pass in the third (footer) parameter here!
-    decoded_key.decrypt(token, footer) # => 'too many secrets'
+    decoded_key.decrypt(token) # => 'too many secrets'
 
 ## Development
 

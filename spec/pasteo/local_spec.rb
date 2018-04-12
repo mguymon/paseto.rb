@@ -42,16 +42,16 @@ RSpec.describe Paseto::V2::Local do
       expect(subject.decrypt(token, key)).to eq payload
     end
 
-    it 'should decrypt a parsed token' do
-      expect(subject.decrypt(Paseto.parse(token), key)).to eq payload
-    end
-
     describe 'with a footer' do
       let(:bad_footer) { 'foot the bill' }
       let(:token) { subject.encrypt(payload, key, footer) }
 
       it 'should decrypt when the footer is correct' do
         expect(subject.decrypt(token, key, footer)).to eq payload
+      end
+
+      it 'should not require footer to decrypt a parsed token' do
+        expect(key.decrypt(Paseto.parse(token))).to eq payload
       end
 
       it "should raise when the footer doesn't match what's expected" do

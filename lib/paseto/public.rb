@@ -66,6 +66,7 @@ module Paseto
         end
 
         def verify(token, footer = nil)
+          footer ||= token.footer if token.is_a? Paseto::Token
           parsed = Paseto.verify_token(token, HEADER, footer)
 
           decoded_message = parsed.payload[0..-(SIGNATURE_BYTES + 1)]

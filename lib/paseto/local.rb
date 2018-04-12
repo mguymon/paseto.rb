@@ -35,6 +35,7 @@ module Paseto
         end
 
         def decrypt(token, footer = nil)
+          footer ||= token.footer if token.is_a? Paseto::Token
           parsed = Paseto.verify_token(token, HEADER, footer)
 
           nonce = parsed.payload[0, NONCE_BYTES]

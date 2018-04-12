@@ -94,6 +94,11 @@ RSpec.describe Paseto::V2::Public do
         expect(message).to eq('test')
       end
 
+      it "does not require a footer from a parsed message" do
+        message = public_key.verify(Paseto.parse(signed_message_with_footer))
+        expect(message).to eq('test')
+      end
+
       it "should raise when the footer doesn't match what's expected" do
         expect do
           subject.verify(signed_message_with_footer, public_key, bad_footer)
