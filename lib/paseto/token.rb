@@ -12,19 +12,25 @@ module Paseto
     end
   end
 
-  def self.parse_raw_token(raw, expected_header = nil, expected_footer = nil)
+  def self.verify_token(raw, expected_header, expected_footer)
+    parse_raw_token(raw).tap do |token|
+      if token.header != expected_header
+        raise HeaderError.new("Invalid message header: #{token.header}")
+      end
+
+      if token.footer != expected_footer
+        raise TokenError.new("Invalid message footer: #{token.footer.inspect}")
+      end
+    end
+  end
+
+  def self.parse_raw_token(raw)
     version, purpose, payload, footer = raw.split('.')
 
     header = "#{version}.#{purpose}"
-    if !expected_header.nil? && header != expected_header
-      raise HeaderError.new("Invalid message header: #{header.inspect}")
-    end
-
     footer = Paseto.decode64(footer) unless footer.nil?
-    if !expected_footer.nil? && footer != expected_footer
-      raise TokenError.new("Invalid message footer: #{footer.inspect}")
-    end
+    payload = Paseto.decode64(payload) unless payload.nil?
 
-    Token.new(header, Paseto.decode64(payload), footer)
+    Token.new(header, payload, footer)
   end
 end

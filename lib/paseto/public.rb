@@ -66,7 +66,7 @@ module Paseto
         end
 
         def verify(token, footer = nil)
-          parsed = Paseto.parse_raw_token(token, HEADER, footer)
+          parsed = Paseto.verify_token(token, HEADER, footer)
 
           decoded_message = parsed.payload[0..-(SIGNATURE_BYTES + 1)]
           signature = parsed.payload[-SIGNATURE_BYTES..-1]

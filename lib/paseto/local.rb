@@ -35,7 +35,7 @@ module Paseto
         end
 
         def decrypt(token, footer = nil)
-          parsed = Paseto.parse_raw_token(token, HEADER, footer)
+          parsed = Paseto.verify_token(token, HEADER, footer)
 
           nonce = parsed.payload[0, NONCE_BYTES]
           ciphertext = parsed.payload[NONCE_BYTES..-1]
