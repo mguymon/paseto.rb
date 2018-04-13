@@ -22,15 +22,15 @@ RSpec.describe Paseto::V2::Public do
   end
 
   describe 'common use cases' do
-    it 'can be used to sign public secrets' do
+    it 'can be used to sign public cleartext' do
       key = subject::SecretKey.generate
-      token = key.sign('too many secrets')
+      token = key.sign('clear as day')
 
       # in the most common case, the public key will be serialized and stored /
       # sent somewhere, and the counterparty will decode it and verify the token
       sent_key = key.public_key.encode64
       decoded_key = subject::PublicKey.decode64(sent_key)
-      expect(decoded_key.verify(token)).to eq('too many secrets')
+      expect(decoded_key.verify(token)).to eq('clear as day')
     end
 
     it 'can verify a value signed by pypaseto' do
