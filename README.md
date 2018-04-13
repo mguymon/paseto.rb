@@ -51,8 +51,8 @@ For all examples:
 ## Using the Message Footer
 
 The message footer is transmitted plaintext, and can be used for key lookup.
-Note that you always must still verify the token, as this also verifies the
-integrity of the footer:
+Note that you still must always verify the token via `#decrypt`,  or `#verify`,
+as this also verifies the integrity of the footer:
 
     Local = Paseto::V2::Local
     token = Paseto.parse(raw_data)
