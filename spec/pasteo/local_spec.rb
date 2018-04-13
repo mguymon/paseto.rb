@@ -20,10 +20,23 @@ RSpec.describe Paseto::V2::Local do
 
   describe '.encrypt' do
     it 'should encrypt the message' do
-      allow_any_instance_of(described_class::Key).to receive(:generate_nonce)
+      allow_any_instance_of(described_class::Key)
+        .to receive(:generate_nonce)
+        .with(payload)
         .and_return(nonce)
 
       expect(subject.encrypt(payload, key)).to eq token
+    end
+
+    it 'should use a different nonce for every message, even if random fails' do
+      key = subject::Key.generate
+      allow(key)
+        .to receive(:generate_nonce_key)
+        .and_return(nonce)
+
+      first = key.send(:generate_nonce, 'first')
+      second = key.send(:generate_nonce, 'second')
+      expect(first).to_not eq(second)
     end
   end
 

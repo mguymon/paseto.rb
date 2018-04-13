@@ -26,7 +26,7 @@ module Paseto
 
         def encrypt(message, footer = nil)
           # Make a nonce: A single-use value never repeated under the same key
-          nonce = generate_nonce
+          nonce = generate_nonce(message)
 
           # Encrypt a message with the AEAD
           ciphertext = @aead.encrypt(nonce, message, additional_data(nonce, footer))
@@ -57,8 +57,14 @@ module Paseto
 
         private
 
-        def generate_nonce
+        def generate_nonce_key
           RbNaCl::Random.random_bytes(NONCE_BYTES)
+        end
+
+        def generate_nonce(message)
+          RbNaCl::Hash::Blake2b.digest(message,
+                                       key: generate_nonce_key,
+                                       digest_size: NONCE_BYTES)
         end
 
         def additional_data(nonce, footer)
