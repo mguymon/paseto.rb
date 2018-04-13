@@ -32,6 +32,23 @@ RSpec.describe Paseto::V2::Public do
       decoded_key = subject::PublicKey.decode64(sent_key)
       expect(decoded_key.verify(token)).to eq('too many secrets')
     end
+
+    it 'can verify a value signed by pypaseto' do
+      # Generated using python 3.6.2 / libsodium: 1.0.16:
+      # from paseto import PasetoV2
+      # import pysodium
+      # import base64
+      # import secrets
+      # public, secret = pysodium.crypto_sign_keypair()
+      # print('public', base64.b64encode(public).replace(b'=', b''))
+      # print('token', PasetoV2.sign(b'clear as day', secret, b'yet another footer'))
+
+      python_key = 'PQPq9DMbAVbNUrnjV0QQnmrzwhNwnK7CB05Rj7hXHj0'
+      python_token = 'v2.public.Y2xlYXIgYXMgZGF5mRyNO1L70aasWgxbbeJqGTxS649_ok1rL-JogiGUIC_bt3ScnCn2-zrp6D5VgZj5E-4D6Qvw6LEW-x7E72UFCA.eWV0IGFub3RoZXIgZm9vdGVy'
+
+      key = subject::PublicKey.decode64(python_key)
+      expect(key.verify(python_token, 'yet another footer')).to eq('clear as day')
+    end
   end
 
   describe Paseto::V2::Public::SecretKey do
