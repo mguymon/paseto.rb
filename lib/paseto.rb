@@ -1,5 +1,5 @@
 require 'base64'
-require 'rbnacl/libsodium'
+require 'rbnacl'
 
 require 'paseto/version'
 require 'paseto/error'
@@ -35,11 +35,11 @@ module Paseto
   end
 
   def self.decode64(str)
-    Base64.decode64(str)
+    Base64.urlsafe_decode64(str)
   end
 
   def self.encode64(bin)
     # Remove the padding on the encode64
-    Base64.strict_encode64(bin).gsub(/=+$/, '')
+    Base64.urlsafe_encode64(bin).gsub(/=+$/, '')
   end
 end

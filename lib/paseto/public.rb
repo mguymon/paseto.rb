@@ -8,7 +8,7 @@ module Paseto
       module Encoder
         private
         def encode_message(message, footer)
-          Paseto.pre_auth_encode(HEADER, message, footer)
+          Paseto.pre_auth_encode(HEADER + '.', message, footer)
         end
       end
 

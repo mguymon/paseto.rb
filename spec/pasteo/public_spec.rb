@@ -3,22 +3,22 @@ require 'securerandom'
 RSpec.describe Paseto::V2::Public do
   subject { described_class }
 
-  let(:encoded_secret_key) { 'KxltS+uXOrPh5ZV2cwECjkcBrXbhTOaqQgg93j6FZ0w' }
+  let(:encoded_secret_key) { 'KxltS-uXOrPh5ZV2cwECjkcBrXbhTOaqQgg93j6FZ0w' }
   let(:secret_key) { Paseto::V2::Public::SecretKey.decode64(encoded_secret_key) }
   let(:encoded_public_key) { 'J3caURidJMcqSGLd4iTznFvOMqM1qv5mwFuzRfWBGZU' }
   let(:public_key) { Paseto::V2::Public::PublicKey.decode64(encoded_public_key) }
   let(:footer) { nil }
 
   let(:signed_message) do
-    'v2.public.dGVzdBRCVsCf+slzp0+MikU4+sxDF6S5xcho1GMyoNr/4gacdYdjSJ30W6GHnQdEPXam1LxIrN7i0qSn1ZUlUcbQQQg'
+    'v2.public.dGVzdD-ZV9h7UClSTPyEwdDMJ7u82FBGCuLMETNCQ9l27dwuWiTz28cJa3sKwXAalpmmWIHVR6nCSK6uBfGlkDDcNAk'
   end
 
   let(:bad_message) do
-    'v2.public.cGVzdBRCVsCf+slzp0+MikU4+sxDF6S5xcho1GMyoNr/4gacdYdjSJ30W6GHnQdEPXam1LxIrN7i0qSn1ZUlUcbQQQg'
+    'v2.public.1GVzdD-ZV9h7UClSTPyEwdDMJ7u82FBGCuLMETNCQ9l27dwuWiTz28cJa3sKwXAalpmmWIHVR6nCSK6uBfGlkDDcNAk'
   end
 
   let(:signed_message_with_footer) do
-    'v2.public.dGVzdPZfnxfDSw8vuPoRaeTao+h1nhbn0e10GUSEBtbbHza6LPdUKApm5YorohRGKO2zdvauiVbAKgixLjKtXxYC7w0.cGxhaW4gdGV4dCBmb290ZXI'
+    'v2.public.dGVzdAa9qTiwBSzyyzLLVZb9mWW1owZuP_ezSiZZWfSp2GIOE6ZvJ9zMlHZrsm8MYMZcOKTchqxo5dTJKu-xHJ2gFgA.cGxhaW4gdGV4dCBmb290ZXI'
   end
 
   describe 'common use cases' do
@@ -37,6 +37,10 @@ RSpec.describe Paseto::V2::Public do
   describe Paseto::V2::Public::SecretKey do
     it 'can encode key material' do
       expect(secret_key.encode64).to eq(encoded_secret_key)
+    end
+
+    it 'can export public key' do
+      expect(secret_key.public_key.encode64).to eq(encoded_public_key)
     end
   end
 

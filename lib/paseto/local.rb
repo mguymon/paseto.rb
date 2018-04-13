@@ -2,13 +2,13 @@ module Paseto
   module V2
     module Local
       HEADER = 'v2.local'
-      NONCE_BYTES = RbNaCl::AEAD::ChaCha20Poly1305IETF.nonce_bytes
+      NONCE_BYTES = RbNaCl::AEAD::XChaCha20Poly1305IETF.nonce_bytes
 
       NonceError = Class.new(Paseto::Error)
 
       class Key
         def self.generate
-          new(RbNaCl::Random.random_bytes(RbNaCl::AEAD::ChaCha20Poly1305IETF.key_bytes))
+          new(RbNaCl::Random.random_bytes(RbNaCl::AEAD::XChaCha20Poly1305IETF.key_bytes))
         end
 
         def self.decode64(encoded_key)
@@ -17,7 +17,7 @@ module Paseto
 
         def initialize(key)
           @key = key
-          @aead = RbNaCl::AEAD::ChaCha20Poly1305IETF.new(key)
+          @aead = RbNaCl::AEAD::XChaCha20Poly1305IETF.new(key)
         end
 
         def encode64
@@ -62,7 +62,7 @@ module Paseto
         end
 
         def additional_data(nonce, footer)
-          Paseto.pre_auth_encode(HEADER, nonce, footer)
+          Paseto.pre_auth_encode(HEADER + '.', nonce, footer)
         end
       end
 
