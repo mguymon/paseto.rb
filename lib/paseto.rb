@@ -1,5 +1,5 @@
 require 'base64'
-require 'rbnacl'
+require 'rbnacl/libsodium'
 
 require 'paseto/version'
 require 'paseto/error'
