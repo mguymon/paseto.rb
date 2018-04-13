@@ -6,8 +6,8 @@ require 'paseto/version'
 Gem::Specification.new do |spec|
   spec.name          = 'paseto'
   spec.version       = Paseto::VERSION
-  spec.authors       = ['Michael Guymon']
-  spec.email         = ['mguymon@instructure.com']
+  spec.authors       = ['Michael Guymon', 'Frank Murphy']
+  spec.email         = ['mguymon@instructure.com', 'fmurphy@instructure.com']
 
   spec.summary       = %q{Ruby impl of Paseto}
   spec.description   = %q{Ruby impl of Paseto}
