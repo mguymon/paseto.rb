@@ -26,4 +26,12 @@ RSpec.describe Paseto do
       expect(described_class.pre_auth_encode('test')).to eq("\x01\x00\x00\x00\x00\x00\x00\x00\x04\x00\x00\x00\x00\x00\x00\x00test")
     end
   end
+
+  describe '#parse' do
+    it 'can be used to read the message footer' do
+      Token = Paseto::V2::Local
+      token = Token.encrypt('message', Token::Key.generate, 'hello there')
+      expect(described_class.parse(token).footer).to eq('hello there')
+    end
+  end
 end

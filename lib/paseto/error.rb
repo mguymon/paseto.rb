@@ -1,4 +1,6 @@
 module Paseto
   Error = Class.new(StandardError)
-  BadHeaderError = Class.new(Error)
+  HeaderError = Class.new(Error)
+  TokenError = Class.new(Error)
+  AuthenticationError = Class.new(Error)
 end

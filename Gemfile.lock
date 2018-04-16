@@ -1,7 +1,14 @@
+GIT
+  remote: https://github.com/anirishduck/rbnacl
+  revision: ff58f9e5dcae0617a3ead398aadd51553c6baed1
+  specs:
+    rbnacl (5.0.0)
+      ffi
+
 PATH
   remote: .
   specs:
-    paseto (0.1.0)
+    paseto (0.2.0)
       rbnacl-libsodium (~> 1.0)
 
 GEM
@@ -15,8 +22,6 @@ GEM
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
     rake (10.5.0)
-    rbnacl (5.0.0)
-      ffi
     rbnacl-libsodium (1.0.16)
       rbnacl (>= 3.0.1)
     rspec (3.7.0)
@@ -41,6 +46,7 @@ DEPENDENCIES
   paseto!
   pry (~> 0.11)
   rake (~> 10.0)
+  rbnacl!
   rspec (~> 3.0)
 
 BUNDLED WITH

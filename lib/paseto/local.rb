@@ -1,62 +1,84 @@
 module Paseto
-  class Local
-    HEADER = 'v2.local'
-    NONCE_BYTES = RbNaCl::AEAD::ChaCha20Poly1305IETF.nonce_bytes
+  module V2
+    module Local
+      HEADER = 'v2.local'
+      NONCE_BYTES = RbNaCl::AEAD::XChaCha20Poly1305IETF.nonce_bytes
 
-    NonceError = Class.new(Paseto::Error)
-    AuthError = Class.new(Paseto::Error)
-    BadMessageError = Class.new(Paseto::Error)
+      NonceError = Class.new(Paseto::Error)
 
-    def self.generate_aead_key
-      RbNaCl::Random.random_bytes(RbNaCl::AEAD::ChaCha20Poly1305IETF.key_bytes)
-    end
+      class Key
+        def self.generate
+          new(RbNaCl::Random.random_bytes(RbNaCl::AEAD::XChaCha20Poly1305IETF.key_bytes))
+        end
 
-    def self.generate_nonce
-      RbNaCl::Random.random_bytes(NONCE_BYTES)
-    end
+        def self.decode64(encoded_key)
+          new(Paseto.decode64(encoded_key))
+        end
 
-    def self.from_encode64_key(encoded_key, footer = nil)
-      new(Paseto.decode64(encoded_key), footer)
-    end
+        def initialize(key)
+          @key = key
+          @aead = RbNaCl::AEAD::XChaCha20Poly1305IETF.new(key)
+        end
 
-    def initialize(private_key, footer = nil)
-      @aead = RbNaCl::AEAD::ChaCha20Poly1305IETF.new(private_key)
-      @footer = footer
-    end
+        def encode64
+          Paseto.encode64(@key)
+        end
 
-    def encrypt(message)
-      # Make a nonce: A single-use value never repeated under the same key
-      nonce = self.class.generate_nonce
+        def encrypt(message, footer = nil)
+          # Make a nonce: A single-use value never repeated under the same key
+          nonce = generate_nonce(message)
 
-      # Encrypt a message with the AEAD
-      ciphertext = @aead.encrypt(nonce, message, additional_data(nonce))
+          # Encrypt a message with the AEAD
+          ciphertext = @aead.encrypt(nonce, message, additional_data(nonce, footer))
 
-      Paseto::Message.new(HEADER, nonce + ciphertext, @footer).to_message
-    end
+          Paseto::Token.new(HEADER, nonce + ciphertext, footer).to_message
+        end
 
-    def decrypt(message)
-      raise Paseto::BadHeaderError.new('Invalid message header.') unless message.start_with?(HEADER)
+        def decrypt(token, footer = nil)
+          footer ||= token.footer if token.is_a? Paseto::Token
+          parsed = Paseto.verify_token(token, HEADER, footer)
 
-      computed_msg = Paseto.validate_and_remove_footer(message, @footer)
-      decoded_payload = Paseto.decode64(computed_msg[9..-1]);
-      nonce = decoded_payload[0, NONCE_BYTES]
-      ciphertext = decoded_payload[NONCE_BYTES..-1]
+          nonce = parsed.payload[0, NONCE_BYTES]
+          ciphertext = parsed.payload[NONCE_BYTES..-1]
 
-      raise BadMessageError.new('Unable to process message') if nonce.nil? || ciphertext.nil?
+          raise BadMessageError.new('Unable to process message') if nonce.nil? || ciphertext.nil?
 
-      begin
-        @aead.decrypt(nonce, ciphertext, additional_data(nonce))
-      rescue RbNaCl::LengthError
-        raise NonceError, 'Invalid nonce'
-      rescue RbNaCl::CryptoError
-        raise AuthError, 'Message cannot be authenticated'
-      rescue
-        raise BadMessageError, 'Unable to process message'
+          begin
+            data = additional_data(nonce, footer)
+            @aead.decrypt(nonce, ciphertext, data)
+          rescue RbNaCl::LengthError
+            raise NonceError, 'Invalid nonce'
+          rescue RbNaCl::CryptoError
+            raise AuthenticationError, 'Token signature invalid'
+          rescue
+            raise TokenError, 'Unable to process message'
+          end
+        end
+
+        private
+
+        def generate_nonce_key
+          RbNaCl::Random.random_bytes(NONCE_BYTES)
+        end
+
+        def generate_nonce(message)
+          RbNaCl::Hash::Blake2b.digest(message,
+                                       key: generate_nonce_key,
+                                       digest_size: NONCE_BYTES)
+        end
+
+        def additional_data(nonce, footer)
+          Paseto.pre_auth_encode(HEADER + '.', nonce, footer)
+        end
       end
-    end
 
-    def additional_data(nonce)
-      Paseto.pre_auth_encode(HEADER, nonce, @footer)
+      def self.encrypt(message, key, footer = nil)
+        key.encrypt(message, footer)
+      end
+
+      def self.decrypt(token, key, footer = nil)
+        key.decrypt(token, footer)
+      end
     end
   end
 end
