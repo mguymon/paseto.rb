@@ -41,11 +41,11 @@ For all examples:
 ## Encrypting Messages with a Shared Secret
 
     Key = Paseto::V2::Local::Key
-    key = Local::Key.generate
+    key = Key.generate
     token = key.encrypt('a fancy message')
 
     saved_key = key.encode64 # a base64 string representation of the key
-    decoded_key = Local::Key.decode64(saved_key)
+    decoded_key = Key.decode64(saved_key)
     decoded_key.decrypt(token) # => 'a fancy message'
 
 ## Using the Message Footer
