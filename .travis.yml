@@ -1,11 +1,6 @@
 sudo: false
 language: ruby
 dist: xenial
-addons:
-  apt:
-    update: true
-    packages:
-      - libsodium18
 before_install:
-  - sudo ln -s /usr/lib/x86_64-linux-gnu/libsodium.so.18 /usr/lib/x86_64-linux-gnu/libsodium.so
+  - scripts/build-libsodium
   - gem install bundler -v 1.16.1
