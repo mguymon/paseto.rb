@@ -8,8 +8,8 @@ Ruby implementation of [Paseto](https://github.com/paragonie/paseto) using [libs
 
 ## Installation
 
-To use Paseto, you will need to install [libsodium][] (at least version `1.0.12` is
-required). See [Installing libsodium][] for installation instructions.
+To use Paseto, you will need to install [libsodium] (at least version `1.0.12` is
+required). See [Installing libsodium] for installation instructions.
 
 Add this line to your application's Gemfile:
 
