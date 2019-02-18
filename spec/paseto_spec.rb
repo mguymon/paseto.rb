@@ -11,6 +11,10 @@ RSpec.describe Paseto do
     it 'should encode a length' do
       expect(described_class.encode_length(4)).to eq("\x04\x00\x00\x00\x00\x00\x00\x00")
     end
+
+    it 'should encode numbers greater than 255' do
+      expect(described_class.encode_length(256)).to eq("\x00\x01\x00\x00\x00\x00\x00\x00")
+    end
   end
 
   describe '#pre_auth_encode' do

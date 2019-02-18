@@ -8,19 +8,12 @@ require 'paseto/public'
 require 'paseto/local'
 
 module Paseto
+  # An Array#pack format to pack an unsigned little-endian 64-bit integer
+  UNSIGNED_LITTLE_64 = 'Q<'.freeze
 
   # https://github.com/paragonie/paseto/blob/master/docs/01-Protocol-Versions/Common.md#pae-definition
   def self.encode_length(n)
-    str = []
-    (0..7).each do |i|
-      # Clear the MSB for interoperability
-      n &= 127 if (i === 7)
-
-      str << (n & 255)
-      n = n >> 8
-    end
-
-    str.pack('Q')
+    [n].pack(UNSIGNED_LITTLE_64)
   end
 
   # https://github.com/paragonie/paseto/blob/master/docs/01-Protocol-Versions/Common.md#pae-definition
