@@ -1,0 +1,38 @@
+require: rubocop-rspec
+
+AllCops:
+  TargetRubyVersion: 2.3
+
+Layout/MultilineMethodCallIndentation:
+  EnforcedStyle: indented
+
+Metrics/LineLength:
+  Max: 100
+  Exclude:
+    - "spec/**/*.rb"
+
+Metrics/AbcSize:
+  Max: 25
+
+Metrics/BlockLength:
+  Exclude:
+    - "spec/**/*.rb"
+
+Metrics/MethodLength:
+  Max: 30
+
+RSpec/ExampleLength:
+  Max: 10
+
+RSpec/MessageSpies:
+  Enabled: false
+
+RSpec/VerifiedDoubles:
+  Enabled: false
+
+Security/Eval:
+  Exclude:
+    - "spec/**/*.rb"
+
+Style/MultilineBlockChain:
+  Enabled: false

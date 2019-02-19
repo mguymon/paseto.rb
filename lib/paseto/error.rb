@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Paseto
   Error = Class.new(StandardError)
   HeaderError = Class.new(Error)

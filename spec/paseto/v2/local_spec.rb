@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'securerandom'
 
 RSpec.describe Paseto::V2::Local do
-  subject { described_class }
+  let(:local) { described_class }
 
   # Generated using https://github.com/paragonie/paseto:
   #
@@ -24,30 +26,28 @@ RSpec.describe Paseto::V2::Local do
   let(:nonce) { "\0" * 24 }
 
   describe Paseto::V2::Local::Key do
-    subject { described_class }
-
     it '.encode64 returns a base64-encoded key' do
       expect(key.encode64).to eq(encoded_key)
     end
   end
 
   describe '.encrypt' do
-    it 'should encrypt the message' do
+    it 'encrypts the message' do
       allow(key)
         .to receive(:generate_nonce_key)
         .and_return(nonce)
 
-      expect(subject.encrypt(payload, key)).to eq token
+      expect(local.encrypt(payload, key)).to eq token
     end
 
-    it 'should use a different nonce for every message, even if random fails' do
+    it 'uses a different nonce for every message, even if random fails' do
       allow(key)
         .to receive(:generate_nonce_key)
         .and_return(nonce)
 
       first = key.send(:generate_nonce, 'first')
       second = key.send(:generate_nonce, 'second')
-      expect(first).to_not eq(second)
+      expect(first).not_to eq(second)
     end
   end
 
@@ -66,68 +66,69 @@ RSpec.describe Paseto::V2::Local do
     let(:python_key) { 'L3kflrX9R4kkA0BJtvRMpXQJ892affEei2SmF2ZRizI' }
     let(:python_token) { 'v2.local.saehdwc7x-autna6Nmhypx_Bo5DJGbsw7Fnlugcl5-arym2_FsOQAA4xZXgyCDpSz7i3GOmI06Y.cGxhaW50ZXh0IGZvb3Rlcg' }
 
-    it 'should decrypt the message' do
-      expect(subject.decrypt(token, key)).to eq payload
+    it 'decrypts the message' do
+      expect(local.decrypt(token, key)).to eq payload
     end
 
-    it 'should decrypt a token generated from pypaseto' do
-      key = subject::Key.decode64(python_key)
+    it 'decrypts a token generated from pypaseto' do
+      key = local::Key.decode64(python_key)
+      token = Paseto.parse(python_token)
+      expect(key.decrypt(token)).to eq('too many secrets')
+    end
+
+    it 'decrypts a token footer generated from pypaseto' do
       token = Paseto.parse(python_token)
       expect(token.footer).to eq('plaintext footer')
-      expect(key.decrypt(token)).to eq('too many secrets')
     end
 
     describe 'with a footer' do
       let(:bad_footer) { 'foot the bill' }
-      let(:token) { subject.encrypt(payload, key, footer) }
+      let(:token) { local.encrypt(payload, key, footer) }
 
-      it 'should decrypt when the footer is correct' do
-        expect(subject.decrypt(token, key, footer)).to eq payload
+      it 'decrypts when the footer is correct' do
+        expect(local.decrypt(token, key, footer)).to eq payload
       end
 
-      it 'should not require footer to decrypt a parsed token' do
+      it 'does not require footer to decrypt a parsed token' do
         expect(key.decrypt(Paseto.parse(token))).to eq payload
       end
 
-      it "should raise when the footer doesn't match what's expected" do
-        expect { subject.decrypt(token, key, bad_footer) }.to raise_error Paseto::TokenError
+      it "raises when the footer doesn't match what's expected" do
+        expect { local.decrypt(token, key, bad_footer) }.to raise_error Paseto::TokenError
       end
     end
 
-    it 'should raise an error for a bad header' do
-      expect { subject.decrypt("incorrect.header", key) }.to raise_error Paseto::HeaderError
+    it 'raises an error for a bad header' do
+      expect { local.decrypt('incorrect.header', key) }.to raise_error Paseto::HeaderError
     end
 
-    it 'should raise an error when trying to decrypt a tampered message' do
-      expect(subject.decrypt(original, key, footer)).to eq(payload)
-      expect { subject.decrypt(tampered, key, footer) }.to raise_error Paseto::AuthenticationError
+    it 'raises an error when trying to decrypt a tampered message' do
+      expect { local.decrypt(tampered, key, footer) }.to raise_error Paseto::AuthenticationError
     end
 
-    it 'should raise error trying to decrypt junk' do
-      expect { subject.decrypt("v2.local." + SecureRandom.hex, key) }.to raise_error Paseto::TokenError
+    it 'raises error trying to decrypt junk' do
+      expect { local.decrypt('v2.local.' + SecureRandom.hex, key) }.to raise_error Paseto::TokenError
     end
 
-    describe 'reference implementation conformance' do
-      context 'without a footer' do
-        # Generated using https://github.com/paragonie/paseto:
-        #
-        # use ParagonIE\Paseto\Protocol\Version2;
-        # use ParagonIE\Paseto\Keys\SymmetricKey;
-        # use ParagonIE\ConstantTime\Base64UrlSafe;
-        #
-        # $key = SymmetricKey::generate(new Version2);
-        # $token = Version2::encrypt("too many secrets", $key);
-        #
-        # echo Base64UrlSafe::encodeUnpadded($key->raw());
-        # echo $token;
-        let(:b64_encoded_key) { 'c3JZWBwqZGzvSvBPI9mrqsLwlqwbTlnB1ITaRuIU38s' }
-        let(:token) { 'v2.local.aA_eaOhAMUgdrMW0lH3rAU5e8WCKOAZATWqZ3tdUj7mGhKUA4Hs4t6BHDoytaqpSR47uZGB1qRI' }
-        let(:key) { subject::Key.decode64(b64_encoded_key) }
-        let(:message) { 'too many secrets' }
+    context 'without a footer' do
+      # Generated using https://github.com/paragonie/paseto:
+      #
+      # use ParagonIE\Paseto\Protocol\Version2;
+      # use ParagonIE\Paseto\Keys\SymmetricKey;
+      # use ParagonIE\ConstantTime\Base64UrlSafe;
+      #
+      # $key = SymmetricKey::generate(new Version2);
+      # $token = Version2::encrypt("too many secrets", $key);
+      #
+      # echo Base64UrlSafe::encodeUnpadded($key->raw());
+      # echo $token;
+      let(:b64_encoded_key) { 'c3JZWBwqZGzvSvBPI9mrqsLwlqwbTlnB1ITaRuIU38s' }
+      let(:token) { 'v2.local.aA_eaOhAMUgdrMW0lH3rAU5e8WCKOAZATWqZ3tdUj7mGhKUA4Hs4t6BHDoytaqpSR47uZGB1qRI' }
+      let(:key) { local::Key.decode64(b64_encoded_key) }
+      let(:message) { 'too many secrets' }
 
-        it 'should decrypt the message' do
-          expect(key.decrypt(token)).to eq(message)
-        end
+      it 'decrypts the message' do
+        expect(key.decrypt(token)).to eq(message)
       end
     end
   end

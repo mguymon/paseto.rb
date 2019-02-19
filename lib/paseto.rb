@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'base64'
 require 'rbnacl'
 
@@ -7,15 +9,16 @@ require 'paseto/token'
 require 'paseto/public'
 require 'paseto/local'
 
+# Platform-Agnostic SEcurity TOkens
 module Paseto
-  EMPTY_FOOTER = ''.freeze
+  EMPTY_FOOTER = ''
 
   # An Array#pack format to pack an unsigned little-endian 64-bit integer
-  UNSIGNED_LITTLE_64 = 'Q<'.freeze
+  UNSIGNED_LITTLE_64 = 'Q<'
 
   # https://github.com/paragonie/paseto/blob/master/docs/01-Protocol-Versions/Common.md#pae-definition
-  def self.encode_length(n)
-    [n].pack(UNSIGNED_LITTLE_64)
+  def self.encode_length(num)
+    [num].pack(UNSIGNED_LITTLE_64)
   end
 
   # https://github.com/paragonie/paseto/blob/master/docs/01-Protocol-Versions/Common.md#pae-definition
@@ -23,8 +26,7 @@ module Paseto
     initial_output = encode_length(pieces.length)
 
     pieces.reduce(initial_output) do |output, piece|
-      output += encode_length(piece.length)
-      output += piece
+      output + encode_length(piece.length) + piece
     end
   end
 

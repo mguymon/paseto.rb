@@ -1,11 +1,15 @@
+# frozen_string_literal: true
+
 module Paseto
   module V2
+    # Symmetric Encryption
     module Local
       HEADER = 'v2.local'
       NONCE_BYTES = RbNaCl::AEAD::XChaCha20Poly1305IETF.nonce_bytes
 
       NonceError = Class.new(Paseto::Error)
 
+      # Encryption key
       class Key
         def self.generate
           new(RbNaCl::Random.random_bytes(RbNaCl::AEAD::XChaCha20Poly1305IETF.key_bytes))
@@ -43,7 +47,7 @@ module Paseto
           nonce = parsed.payload[0, NONCE_BYTES]
           ciphertext = parsed.payload[NONCE_BYTES..-1]
 
-          raise BadMessageError.new('Unable to process message') if nonce.nil? || ciphertext.nil?
+          raise BadMessageError, 'Unable to process message' if nonce.nil? || ciphertext.nil?
 
           begin
             data = additional_data(nonce, footer)
@@ -52,7 +56,7 @@ module Paseto
             raise NonceError, 'Invalid nonce'
           rescue RbNaCl::CryptoError
             raise AuthenticationError, 'Token signature invalid'
-          rescue
+          rescue StandardError
             raise TokenError, 'Unable to process message'
           end
         end
