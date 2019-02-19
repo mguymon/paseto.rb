@@ -6,7 +6,7 @@ module Paseto
         Paseto.encode64(payload)
       ]
 
-      message << Paseto.encode64(footer) if footer
+      message << Paseto.encode64(footer) if footer && footer != EMPTY_FOOTER
 
       message.join('.')
     end
@@ -29,7 +29,7 @@ module Paseto
     version, purpose, payload, footer = raw.split('.')
 
     header = "#{version}.#{purpose}"
-    footer = Paseto.decode64(footer) unless footer.nil?
+    footer = footer.nil? ? EMPTY_FOOTER : Paseto.decode64(footer)
     payload = Paseto.decode64(payload) unless payload.nil?
 
     Token.new(header, payload, footer)

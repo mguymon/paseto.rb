@@ -24,7 +24,7 @@ module Paseto
           Paseto.encode64(@key)
         end
 
-        def encrypt(message, footer = nil)
+        def encrypt(message, footer = EMPTY_FOOTER)
           # Make a nonce: A single-use value never repeated under the same key
           nonce = generate_nonce(message)
 
@@ -36,6 +36,8 @@ module Paseto
 
         def decrypt(token, footer = nil)
           footer ||= token.footer if token.is_a? Paseto::Token
+          footer ||= EMPTY_FOOTER
+
           parsed = Paseto.verify_token(token, HEADER, footer)
 
           nonce = parsed.payload[0, NONCE_BYTES]
@@ -72,7 +74,7 @@ module Paseto
         end
       end
 
-      def self.encrypt(message, key, footer = nil)
+      def self.encrypt(message, key, footer = EMPTY_FOOTER)
         key.encrypt(message, footer)
       end
 

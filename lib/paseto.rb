@@ -8,6 +8,8 @@ require 'paseto/public'
 require 'paseto/local'
 
 module Paseto
+  EMPTY_FOOTER = ''.freeze
+
   # An Array#pack format to pack an unsigned little-endian 64-bit integer
   UNSIGNED_LITTLE_64 = 'Q<'.freeze
 
@@ -18,10 +20,9 @@ module Paseto
 
   # https://github.com/paragonie/paseto/blob/master/docs/01-Protocol-Versions/Common.md#pae-definition
   def self.pre_auth_encode(*pieces)
-    compacted_pieces = pieces.compact
+    initial_output = encode_length(pieces.length)
 
-    initial_output = encode_length(compacted_pieces.length)
-    compacted_pieces.reduce(initial_output) do |output, piece|
+    pieces.reduce(initial_output) do |output, piece|
       output += encode_length(piece.length)
       output += piece
     end

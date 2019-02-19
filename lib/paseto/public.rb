@@ -28,7 +28,7 @@ module Paseto
           @nacl = RbNaCl::SigningKey.new(key)
         end
 
-        def sign(message, footer = nil)
+        def sign(message, footer = EMPTY_FOOTER)
           data = encode_message(message, footer)
           # Sign a message with the signing key
           signature = @nacl.sign(data)
@@ -67,6 +67,8 @@ module Paseto
 
         def verify(token, footer = nil)
           footer ||= token.footer if token.is_a? Paseto::Token
+          footer ||= EMPTY_FOOTER
+
           parsed = Paseto.verify_token(token, HEADER, footer)
 
           decoded_message = parsed.payload[0..-(SIGNATURE_BYTES + 1)]
@@ -84,7 +86,7 @@ module Paseto
         end
       end
 
-      def self.sign(message, key, footer = nil)
+      def self.sign(message, key, footer = EMPTY_FOOTER)
         key.sign(message, footer)
       end
 
