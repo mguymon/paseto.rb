@@ -3,14 +3,29 @@ require 'securerandom'
 RSpec.describe Paseto::V2::Public do
   subject { described_class }
 
+  # Generated using https://github.com/paragonie/paseto:
+  #
+  # use ParagonIE\Paseto\Protocol\Version2;
+  # use ParagonIE\Paseto\Keys\AsymmetricSecretKey;
+  # use ParagonIE\ConstantTime\Base64UrlSafe;
+  #
+  # $secretKey = new AsymmetricSecretKey(
+  #   Base64UrlSafe::decode('KxltS-uXOrPh5ZV2cwECjkcBrXbhTOaqQgg93j6FZ0w')
+  # );
+  # $token = Version2::sign('test', $secretKey);
+  # $tokenWithFooter = Version2::sign('test', $secretKey, 'plain text footer')
+  #
+  # echo $token;
+  # echo $tokenWithFooter;
   let(:encoded_secret_key) { 'KxltS-uXOrPh5ZV2cwECjkcBrXbhTOaqQgg93j6FZ0w' }
   let(:secret_key) { Paseto::V2::Public::SecretKey.decode64(encoded_secret_key) }
   let(:encoded_public_key) { 'J3caURidJMcqSGLd4iTznFvOMqM1qv5mwFuzRfWBGZU' }
   let(:public_key) { Paseto::V2::Public::PublicKey.decode64(encoded_public_key) }
   let(:footer) { nil }
+  let(:message) { 'test' }
 
   let(:signed_message) do
-    'v2.public.dGVzdD-ZV9h7UClSTPyEwdDMJ7u82FBGCuLMETNCQ9l27dwuWiTz28cJa3sKwXAalpmmWIHVR6nCSK6uBfGlkDDcNAk'
+    'v2.public.dGVzdC7gAlr_TQTcxOKxEN5uRM9k18CbQPG8MChyiqJJx17AM7hBByXV2U0e4aQCQuTPL73sCUTGVVrySNwkjGB9CAA'
   end
 
   let(:bad_message) do
@@ -69,14 +84,14 @@ RSpec.describe Paseto::V2::Public do
 
   describe '#sign' do
     it 'should sign a message' do
-      expect(subject.sign('test', secret_key)).to eq signed_message
+      expect(subject.sign(message, secret_key)).to eq signed_message
     end
 
     context 'with a footer' do
       let(:footer) { 'plain text footer' }
 
       it 'should sign a message' do
-        expect(subject.sign('test', secret_key, footer)).to eq signed_message_with_footer
+        expect(subject.sign(message, secret_key, footer)).to eq signed_message_with_footer
       end
     end
   end
@@ -103,7 +118,7 @@ RSpec.describe Paseto::V2::Public do
     end
 
     it 'should allow access to the signed payload' do
-      expect(subject.verify(signed_message, public_key)).to eq('test')
+      expect(subject.verify(signed_message, public_key)).to eq(message)
     end
 
     context 'with a footer' do
@@ -112,12 +127,12 @@ RSpec.describe Paseto::V2::Public do
 
       it "should verify when the footer matches what's expected" do
         message = subject.verify(signed_message_with_footer, public_key, footer)
-        expect(message).to eq('test')
+        expect(message).to eq(message)
       end
 
       it "does not require a footer from a parsed message" do
         message = public_key.verify(Paseto.parse(signed_message_with_footer))
-        expect(message).to eq('test')
+        expect(message).to eq(message)
       end
 
       it "should raise when the footer doesn't match what's expected" do

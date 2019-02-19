@@ -3,12 +3,25 @@ require 'securerandom'
 RSpec.describe Paseto::V2::Local do
   subject { described_class }
 
+  # Generated using https://github.com/paragonie/paseto:
+  #
+  # use ParagonIE\Paseto\Protocol\Version2;
+  # use ParagonIE\Paseto\Keys\SymmetricKey;
+  # use ParagonIE\ConstantTime\Base64UrlSafe;
+  # use ParagonIE\Paseto\Tests\NonceFixer;
+  #
+  # $v2Encrypt = NonceFixer::buildUnitTestEncrypt(new Version2)->bindTo(null, new Version2)
+  # $key = new SymmetricKey(Base64UrlSafe::decode('2eOIs-JWWCKvFDg-eHFsIBHfMuN-3bqkceK8moM4S1Y'))
+  # $nonce = str_repeat("\0", 24);
+  # $token = $v2Encrypt('test', $key, '', $nonce);
+  #
+  # echo $token;
   let(:payload) { 'test' }
   let(:encoded_key) { '2eOIs-JWWCKvFDg-eHFsIBHfMuN-3bqkceK8moM4S1Y' }
   let(:key) { Paseto::V2::Local::Key.decode64(encoded_key) }
   let(:footer) { nil }
-  let(:token) { 'v2.local.MDEyMzQ1NjcwMTIzNDU2NzAxMjM0NTY37Iy-a-UM_m_pcMUv8uz5GFsiupo' }
-  let(:nonce) { '012345670123456701234567' }
+  let(:token) { 'v2.local.NIE4RiRUscJNFhEh9gkAKcC-JSvDaHsmSEl7mk2eJDWOIAEISxzeKxjamow' }
+  let(:nonce) { "\0" * 24 }
 
   describe Paseto::V2::Local::Key do
     subject { described_class }
@@ -20,16 +33,14 @@ RSpec.describe Paseto::V2::Local do
 
   describe '.encrypt' do
     it 'should encrypt the message' do
-      allow_any_instance_of(described_class::Key)
-        .to receive(:generate_nonce)
-        .with(payload)
+      allow(key)
+        .to receive(:generate_nonce_key)
         .and_return(nonce)
 
       expect(subject.encrypt(payload, key)).to eq token
     end
 
     it 'should use a different nonce for every message, even if random fails' do
-      key = subject::Key.generate
       allow(key)
         .to receive(:generate_nonce_key)
         .and_return(nonce)
@@ -94,6 +105,30 @@ RSpec.describe Paseto::V2::Local do
 
     it 'should raise error trying to decrypt junk' do
       expect { subject.decrypt("v2.local." + SecureRandom.hex, key) }.to raise_error Paseto::TokenError
+    end
+
+    describe 'reference implementation conformance' do
+      context 'without a footer' do
+        # Generated using https://github.com/paragonie/paseto:
+        #
+        # use ParagonIE\Paseto\Protocol\Version2;
+        # use ParagonIE\Paseto\Keys\SymmetricKey;
+        # use ParagonIE\ConstantTime\Base64UrlSafe;
+        #
+        # $key = SymmetricKey::generate(new Version2);
+        # $token = Version2::encrypt("too many secrets", $key);
+        #
+        # echo Base64UrlSafe::encodeUnpadded($key->raw());
+        # echo $token;
+        let(:b64_encoded_key) { 'c3JZWBwqZGzvSvBPI9mrqsLwlqwbTlnB1ITaRuIU38s' }
+        let(:token) { 'v2.local.aA_eaOhAMUgdrMW0lH3rAU5e8WCKOAZATWqZ3tdUj7mGhKUA4Hs4t6BHDoytaqpSR47uZGB1qRI' }
+        let(:key) { subject::Key.decode64(b64_encoded_key) }
+        let(:message) { 'too many secrets' }
+
+        it 'should decrypt the message' do
+          expect(key.decrypt(token)).to eq(message)
+        end
+      end
     end
   end
 end
