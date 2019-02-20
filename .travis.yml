@@ -6,4 +6,7 @@ rvm:
 dist: xenial
 before_install:
   - scripts/build-libsodium
-  - gem install bundler -v 1.16.1
+script:
+  - bundle exec rspec
+  - bundle exec rubocop
+cache: bundler

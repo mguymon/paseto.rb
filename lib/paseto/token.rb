@@ -1,3 +1,6 @@
+# frozen_string_literal: true
+
+# Helper for verifying and parsing tokens
 module Paseto
   Token = Struct.new(:header, :payload, :footer) do
     def to_message
@@ -14,12 +17,10 @@ module Paseto
 
   def self.verify_token(token, expected_header, expected_footer)
     token = parse(token) unless token.is_a? Token
-    if token.header != expected_header
-      raise HeaderError.new("Invalid message header: #{token.header}")
-    end
+    raise HeaderError, "Invalid message header: #{token.header}" if token.header != expected_header
 
     if token.footer != expected_footer
-      raise TokenError.new("Invalid message footer: #{token.footer.inspect}")
+      raise TokenError, "Invalid message footer: #{token.footer.inspect}"
     end
 
     token

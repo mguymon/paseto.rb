@@ -1,5 +1,6 @@
+# frozen_string_literal: true
 
-lib = File.expand_path('../lib', __FILE__)
+lib = File.expand_path('lib', __dir__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'paseto/version'
 
@@ -9,8 +10,8 @@ Gem::Specification.new do |spec|
   spec.authors       = ['Michael Guymon', 'Frank Murphy']
   spec.email         = ['mguymon@instructure.com', 'fmurphy@instructure.com']
 
-  spec.summary       = %q{Ruby impl of Paseto}
-  spec.description   = %q{Ruby impl of Paseto}
+  spec.summary       = 'Ruby impl of Paseto'
+  spec.description   = 'Ruby impl of Paseto'
   spec.homepage      = 'https://github.com/mguymon/paseto.rb'
   spec.license       = 'MIT'
 
@@ -23,7 +24,9 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'rbnacl', '~> 6.0'
   spec.add_development_dependency 'bundler'
+  spec.add_development_dependency 'pry', '~> 0.11'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'rspec', '~> 3.0'
-  spec.add_development_dependency 'pry', '~> 0.11'
+  spec.add_development_dependency 'rubocop', '~> 0.65'
+  spec.add_development_dependency 'rubocop-rspec', '~> 1.32'
 end

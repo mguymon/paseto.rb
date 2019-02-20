@@ -1,17 +1,23 @@
+# frozen_string_literal: true
+
 module Paseto
   module V2
+    # Asymmetric Authentication (Public-Key Signatures)
     module Public
       HEADER = 'v2.public'
       SIGNATURE_BYTES = RbNaCl::SigningKey.signature_bytes
       BadMessageError = Class.new(Paseto::Error)
 
+      # Encode a message + footer in a Paseto payload
       module Encoder
         private
+
         def encode_message(message, footer)
           Paseto.pre_auth_encode(HEADER + '.', message, footer)
         end
       end
 
+      # secret-key used for signing and verifing
       class SecretKey
         include Encoder
 
@@ -49,6 +55,7 @@ module Paseto
         end
       end
 
+      # public-key used for signing and verifing
       class PublicKey
         include Encoder
 
@@ -74,14 +81,16 @@ module Paseto
           decoded_message = parsed.payload[0..-(SIGNATURE_BYTES + 1)]
           signature = parsed.payload[-SIGNATURE_BYTES..-1]
 
-          raise BadMessageError.new('Unable to process message') if decoded_message.nil? || signature.nil?
+          if decoded_message.nil? || signature.nil?
+            raise BadMessageError, 'Unable to process message'
+          end
 
           begin
             data = encode_message(decoded_message, footer)
             @nacl.verify(signature, data)
             decoded_message
           rescue RbNaCl::BadSignatureError
-            raise AuthenticationError.new('Token signature invalid')
+            raise AuthenticationError, 'Token signature invalid'
           end
         end
       end

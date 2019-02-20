@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'securerandom'
 
 RSpec.describe Paseto::V2::Public do
-  subject { described_class }
+  let(:public) { described_class }
 
   # Generated using https://github.com/paragonie/paseto:
   #
@@ -38,13 +40,13 @@ RSpec.describe Paseto::V2::Public do
 
   describe 'common use cases' do
     it 'can be used to sign public cleartext' do
-      key = subject::SecretKey.generate
+      key = public::SecretKey.generate
       token = key.sign('clear as day')
 
       # in the most common case, the public key will be serialized and stored /
       # sent somewhere, and the counterparty will decode it and verify the token
       sent_key = key.public_key.encode64
-      decoded_key = subject::PublicKey.decode64(sent_key)
+      decoded_key = public::PublicKey.decode64(sent_key)
       expect(decoded_key.verify(token)).to eq('clear as day')
     end
 
@@ -61,7 +63,7 @@ RSpec.describe Paseto::V2::Public do
       python_key = 'PQPq9DMbAVbNUrnjV0QQnmrzwhNwnK7CB05Rj7hXHj0'
       python_token = 'v2.public.Y2xlYXIgYXMgZGF5mRyNO1L70aasWgxbbeJqGTxS649_ok1rL-JogiGUIC_bt3ScnCn2-zrp6D5VgZj5E-4D6Qvw6LEW-x7E72UFCA.eWV0IGFub3RoZXIgZm9vdGVy'
 
-      key = subject::PublicKey.decode64(python_key)
+      key = public::PublicKey.decode64(python_key)
       expect(key.verify(python_token, 'yet another footer')).to eq('clear as day')
     end
   end
@@ -83,61 +85,67 @@ RSpec.describe Paseto::V2::Public do
   end
 
   describe '#sign' do
-    it 'should sign a message' do
-      expect(subject.sign(message, secret_key)).to eq signed_message
+    it 'signs a message' do
+      expect(public.sign(message, secret_key)).to eq signed_message
     end
 
     context 'with a footer' do
       let(:footer) { 'plain text footer' }
 
-      it 'should sign a message' do
-        expect(subject.sign(message, secret_key, footer)).to eq signed_message_with_footer
+      it 'signs a message' do
+        expect(public.sign(message, secret_key, footer)).to eq signed_message_with_footer
       end
     end
   end
 
   describe '#verify' do
-    it 'should verify a message' do
-      expect(subject.verify(signed_message, public_key)).to be_truthy
+    it 'verifies a message' do
+      expect(public.verify(signed_message, public_key)).to be_truthy
     end
 
     it 'can verify a message with the secret key' do
-      expect(subject.verify(signed_message, secret_key)).to be_truthy
+      expect(public.verify(signed_message, secret_key)).to be_truthy
     end
 
-    it 'should reject a bad signature' do
-      expect { subject.verify(bad_message, public_key) }.to raise_error Paseto::AuthenticationError
+    it 'rejects a bad signature' do
+      expect { public.verify(bad_message, public_key) }.to(
+        raise_error Paseto::AuthenticationError
+      )
     end
 
-    it 'should raise an error for a bad header' do
-      expect { subject.verify("incorrect.header", public_key) }.to raise_error Paseto::HeaderError
+    it 'raises an error for a bad header' do
+      expect { public.verify('incorrect.header', public_key) }.to(
+        raise_error Paseto::HeaderError
+      )
     end
 
-    it 'should raise error trying to decrypt junk' do
-      expect { subject.verify("v2.public." + SecureRandom.hex, public_key) }.to raise_error Paseto::Error
+    it 'raises error trying to decrypt junk' do
+      expect { public.verify('v2.public.' + SecureRandom.hex, public_key) }.to(
+        raise_error Paseto::Error
+      )
     end
 
-    it 'should allow access to the signed payload' do
-      expect(subject.verify(signed_message, public_key)).to eq(message)
+    it 'allows access to the signed payload' do
+      expect(public.verify(signed_message, public_key)).to eq(message)
     end
 
     context 'with a footer' do
       let(:footer) { 'plain text footer' }
       let(:bad_footer) { 'other foot' }
 
-      it "should verify when the footer matches what's expected" do
-        message = subject.verify(signed_message_with_footer, public_key, footer)
+      it "verifies when the footer matches what's expected" do
+        message = public.verify(signed_message_with_footer, public_key, footer)
         expect(message).to eq(message)
       end
 
-      it "does not require a footer from a parsed message" do
+      it 'does not require a footer from a parsed message' do
         message = public_key.verify(Paseto.parse(signed_message_with_footer))
         expect(message).to eq(message)
       end
 
-      it "should raise when the footer doesn't match what's expected" do
+      it "raises when the footer doesn't match what's expected" do
         expect do
-          subject.verify(signed_message_with_footer, public_key, bad_footer)
+          public.verify(signed_message_with_footer, public_key, bad_footer)
         end.to raise_error Paseto::TokenError
       end
     end
