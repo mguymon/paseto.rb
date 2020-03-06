@@ -2,9 +2,9 @@
 
 set -e
 
-wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.16.tar.gz
-tar -zxf libsodium-1.0.16.tar.gz
-cd libsodium-1.0.16
+wget https://download.libsodium.org/libsodium/releases/libsodium-1.0.18.tar.gz
+tar -zxf libsodium-1.0.18.tar.gz
+cd libsodium-1.0.18
 ./configure
 make
 sudo make install
