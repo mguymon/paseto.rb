@@ -5,6 +5,7 @@
 - Update rbnacl and fix warning [<a href="https://github.com/mguymon/paseto.rb/pull/10">Pull #10</a> by <a href="https://github.com/shaicoleman">shaicoleman</a>]
 - Codecov and Travis support
 - Rubocop is the law :oncoming_police_car:
+- Update rake to fix vulnerability CVE-2020-8130
 
 ### 0.3 (Dec 4, 2018)
 
