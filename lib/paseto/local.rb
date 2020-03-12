@@ -19,6 +19,10 @@ module Paseto
           new(Paseto.decode64(encoded_key))
         end
 
+        def self.decode_hex(encoded_key)
+          new(Paseto.decode_hex(encoded_key))
+        end
+
         def initialize(key)
           @key = key
           @aead = RbNaCl::AEAD::XChaCha20Poly1305IETF.new(key)
@@ -26,6 +30,10 @@ module Paseto
 
         def encode64
           Paseto.encode64(@key)
+        end
+
+        def encode_hex
+          Paseto.encode_hex(@key)
         end
 
         def encrypt(message, footer = EMPTY_FOOTER)

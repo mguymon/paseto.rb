@@ -19,10 +19,10 @@ RSpec.describe Paseto::V2::Public do
   #
   # echo $token;
   # echo $tokenWithFooter;
-  let(:encoded_secret_key) { 'KxltS-uXOrPh5ZV2cwECjkcBrXbhTOaqQgg93j6FZ0w' }
-  let(:secret_key) { Paseto::V2::Public::SecretKey.decode64(encoded_secret_key) }
-  let(:encoded_public_key) { 'J3caURidJMcqSGLd4iTznFvOMqM1qv5mwFuzRfWBGZU' }
-  let(:public_key) { Paseto::V2::Public::PublicKey.decode64(encoded_public_key) }
+  let(:b64_encoded_secret_key) { 'KxltS-uXOrPh5ZV2cwECjkcBrXbhTOaqQgg93j6FZ0w' }
+  let(:secret_key) { Paseto::V2::Public::SecretKey.decode64(b64_encoded_secret_key) }
+  let(:b64_encoded_public_key) { 'J3caURidJMcqSGLd4iTznFvOMqM1qv5mwFuzRfWBGZU' }
+  let(:public_key) { Paseto::V2::Public::PublicKey.decode64(b64_encoded_public_key) }
   let(:footer) { nil }
   let(:message) { 'test' }
 
@@ -66,21 +66,30 @@ RSpec.describe Paseto::V2::Public do
       key = public::PublicKey.decode64(python_key)
       expect(key.verify(python_token, 'yet another footer')).to eq('clear as day')
     end
+
+    it 'can verify a value from the PHP Paseto reference documentation' do
+      php_key = '11324397f535562178d53ff538e49d5a162242970556b4edd950c87c7d86648a'
+      php_token = 'v2.public.eyJleHAiOiIyMDM5LTAxLTAxVDAwOjAwOjAwKzAwOjAwIiwiZGF0YSI6InRoaXMgaXMgYSBzaWduZWQgbWVzc2FnZSJ91gC7-jCWsN3mv4uJaZxZp0btLJgcyVwL-svJD7f4IHyGteKe3HTLjHYTGHI1MtCqJ-ESDLNoE7otkIzamFskCA'
+      message = JSON.generate(exp: '2039-01-01T00:00:00+00:00', data: 'this is a signed message')
+
+      key = public::PublicKey.decode_hex(php_key)
+      expect(key.verify(php_token, '')).to eq(message)
+    end
   end
 
   describe Paseto::V2::Public::SecretKey do
     it 'can encode key material' do
-      expect(secret_key.encode64).to eq(encoded_secret_key)
+      expect(secret_key.encode64).to eq(b64_encoded_secret_key)
     end
 
     it 'can export public key' do
-      expect(secret_key.public_key.encode64).to eq(encoded_public_key)
+      expect(secret_key.public_key.encode64).to eq(b64_encoded_public_key)
     end
   end
 
   describe Paseto::V2::Public::SecretKey do
     it 'can encode key material' do
-      expect(public_key.encode64).to eq(encoded_public_key)
+      expect(public_key.encode64).to eq(b64_encoded_public_key)
     end
   end
 

@@ -29,6 +29,10 @@ module Paseto
           new(Paseto.decode64(encoded_key))
         end
 
+        def self.decode_hex(encoded_key)
+          new(Paseto.decode_hex(encoded_key))
+        end
+
         def initialize(key)
           @key = key
           @nacl = RbNaCl::SigningKey.new(key)
@@ -53,6 +57,10 @@ module Paseto
         def encode64
           Paseto.encode64(@key)
         end
+
+        def encode_hex
+          Paseto.encode_hex(@key)
+        end
       end
 
       # public-key used for signing and verifing
@@ -63,6 +71,10 @@ module Paseto
           new(Paseto.decode64(encoded_key))
         end
 
+        def self.decode_hex(encoded_key)
+          new(Paseto.decode_hex(encoded_key))
+        end
+
         def initialize(key)
           @key = key
           @nacl = RbNaCl::VerifyKey.new(key)
@@ -70,6 +82,10 @@ module Paseto
 
         def encode64
           Paseto.encode64(@key)
+        end
+
+        def encode_hex
+          Paseto.encode_hex(@key)
         end
 
         def verify(token, footer = nil)
