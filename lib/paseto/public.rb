@@ -17,12 +17,12 @@ module Paseto
         end
       end
 
-      # secret-key used for signing and verifing
+      # secret-key used for signing and verifying
       class SecretKey
         include Encoder
 
         def self.generate
-          new(RbNaCl::SigningKey.generate)
+          new(RbNaCl::SigningKey.generate.to_bytes)
         end
 
         def self.decode64(encoded_key)
