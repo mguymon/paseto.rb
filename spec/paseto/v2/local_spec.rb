@@ -20,6 +20,7 @@ RSpec.describe Paseto::V2::Local do
   # echo $token;
   let(:payload) { 'test' }
   let(:b64_encoded_key) { '2eOIs-JWWCKvFDg-eHFsIBHfMuN-3bqkceK8moM4S1Y' }
+  let(:hex_encoded_key) { 'd9e388b3e2565822af14383e78716c2011df32e37eddbaa471e2bc9a83384b56' }
   let(:key) { Paseto::V2::Local::Key.decode64(b64_encoded_key) }
   let(:footer) { nil }
   let(:token) { 'v2.local.NIE4RiRUscJNFhEh9gkAKcC-JSvDaHsmSEl7mk2eJDWOIAEISxzeKxjamow' }
@@ -28,6 +29,10 @@ RSpec.describe Paseto::V2::Local do
   describe Paseto::V2::Local::Key do
     it '.encode64 returns a base64-encoded key' do
       expect(key.encode64).to eq(b64_encoded_key)
+    end
+
+    it '.encode_hex returns a hex encoded key' do
+      expect(key.encode_hex).to eq(hex_encoded_key)
     end
   end
 

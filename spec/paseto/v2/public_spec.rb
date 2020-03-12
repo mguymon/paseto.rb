@@ -20,8 +20,10 @@ RSpec.describe Paseto::V2::Public do
   # echo $token;
   # echo $tokenWithFooter;
   let(:b64_encoded_secret_key) { 'KxltS-uXOrPh5ZV2cwECjkcBrXbhTOaqQgg93j6FZ0w' }
+  let(:hex_encoded_secret_key) { '2b196d4beb973ab3e1e595767301028e4701ad76e14ce6aa42083dde3e85674c' }
   let(:secret_key) { Paseto::V2::Public::SecretKey.decode64(b64_encoded_secret_key) }
   let(:b64_encoded_public_key) { 'J3caURidJMcqSGLd4iTznFvOMqM1qv5mwFuzRfWBGZU' }
+  let(:hex_encoded_public_key) { '27771a51189d24c72a4862dde224f39c5bce32a335aafe66c05bb345f5811995' }
   let(:public_key) { Paseto::V2::Public::PublicKey.decode64(b64_encoded_public_key) }
   let(:footer) { nil }
   let(:message) { 'test' }
@@ -82,14 +84,22 @@ RSpec.describe Paseto::V2::Public do
       expect(secret_key.encode64).to eq(b64_encoded_secret_key)
     end
 
-    it 'can export public key' do
+    it 'can export public key in base64' do
       expect(secret_key.public_key.encode64).to eq(b64_encoded_public_key)
+    end
+
+    it 'can export public key in hex' do
+      expect(secret_key.public_key.encode_hex).to eq(hex_encoded_public_key)
     end
   end
 
   describe Paseto::V2::Public::SecretKey do
-    it 'can encode key material' do
+    it 'can encode key material in base64' do
       expect(public_key.encode64).to eq(b64_encoded_public_key)
+    end
+
+    it 'can encode key material in hex' do
+      expect(public_key.encode_hex).to eq(hex_encoded_public_key)
     end
   end
 
