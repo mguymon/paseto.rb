@@ -44,4 +44,20 @@ RSpec.describe Paseto do
       expect(described_class.parse(token).footer).to eq('hello there')
     end
   end
+
+  describe '#encode_hex' do
+    it 'can encodes binary to hex' do
+      binary = (+"\x00\x12\x9a\xff\x00").force_encoding('BINARY')
+      hex = '00129aff00'
+      expect(described_class.encode_hex(binary)).to eq(hex)
+    end
+  end
+
+  describe '#decode_hex' do
+    it 'can decodes hex to binary' do
+      hex = '00129aff00'
+      binary = (+"\x00\x12\x9a\xff\x00").force_encoding('BINARY')
+      expect(described_class.decode_hex(hex)).to eq(binary)
+    end
+  end
 end

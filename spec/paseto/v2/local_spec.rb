@@ -19,15 +19,20 @@ RSpec.describe Paseto::V2::Local do
   #
   # echo $token;
   let(:payload) { 'test' }
-  let(:encoded_key) { '2eOIs-JWWCKvFDg-eHFsIBHfMuN-3bqkceK8moM4S1Y' }
-  let(:key) { Paseto::V2::Local::Key.decode64(encoded_key) }
+  let(:b64_encoded_key) { '2eOIs-JWWCKvFDg-eHFsIBHfMuN-3bqkceK8moM4S1Y' }
+  let(:hex_encoded_key) { 'd9e388b3e2565822af14383e78716c2011df32e37eddbaa471e2bc9a83384b56' }
+  let(:key) { Paseto::V2::Local::Key.decode64(b64_encoded_key) }
   let(:footer) { nil }
   let(:token) { 'v2.local.NIE4RiRUscJNFhEh9gkAKcC-JSvDaHsmSEl7mk2eJDWOIAEISxzeKxjamow' }
   let(:nonce) { "\0" * 24 }
 
   describe Paseto::V2::Local::Key do
     it '.encode64 returns a base64-encoded key' do
-      expect(key.encode64).to eq(encoded_key)
+      expect(key.encode64).to eq(b64_encoded_key)
+    end
+
+    it '.encode_hex returns a hex encoded key' do
+      expect(key.encode_hex).to eq(hex_encoded_key)
     end
   end
 
@@ -129,6 +134,18 @@ RSpec.describe Paseto::V2::Local do
 
       it 'decrypts the message' do
         expect(key.decrypt(token)).to eq(message)
+      end
+    end
+
+    describe 'PHP reference implementation example' do
+      let(:token) { 'v2.local.QAxIpVe-ECVNI1z4xQbm_qQYomyT3h8FtV8bxkz8pBJWkT8f7HtlOpbroPDEZUKop_vaglyp76CzYy375cHmKCW8e1CCkV0Lflu4GTDyXMqQdpZMM1E6OaoQW27gaRSvWBrR3IgbFIa0AkuUFw.UGFyYWdvbiBJbml0aWF0aXZlIEVudGVycHJpc2Vz' }
+      let(:hex_encoded_key) { '707172737475767778797a7b7c7d7e7f808182838485868788898a8b8c8d8e8f' }
+      let(:key) { local::Key.decode_hex(hex_encoded_key) }
+      let(:message) { JSON.generate(exp: '2039-01-01T00:00:00+00:00', data: 'this is a signed message') }
+      let(:footer) { 'Paragon Initiative Enterprises' }
+
+      it 'decrypts the message' do
+        expect(key.decrypt(token, footer)).to eq(message)
       end
     end
   end

@@ -38,4 +38,12 @@ module Paseto
     # Remove the padding on the encode64
     Base64.urlsafe_encode64(bin).gsub(/=+$/, '')
   end
+
+  def self.decode_hex(str)
+    [str].pack('H*')
+  end
+
+  def self.encode_hex(bin)
+    bin.unpack('H*').first
+  end
 end

@@ -17,16 +17,20 @@ module Paseto
         end
       end
 
-      # secret-key used for signing and verifing
+      # secret-key used for signing and verifying
       class SecretKey
         include Encoder
 
         def self.generate
-          new(RbNaCl::SigningKey.generate)
+          new(RbNaCl::SigningKey.generate.to_bytes)
         end
 
         def self.decode64(encoded_key)
           new(Paseto.decode64(encoded_key))
+        end
+
+        def self.decode_hex(encoded_key)
+          new(Paseto.decode_hex(encoded_key))
         end
 
         def initialize(key)
@@ -53,6 +57,10 @@ module Paseto
         def encode64
           Paseto.encode64(@key)
         end
+
+        def encode_hex
+          Paseto.encode_hex(@key)
+        end
       end
 
       # public-key used for signing and verifing
@@ -63,6 +71,10 @@ module Paseto
           new(Paseto.decode64(encoded_key))
         end
 
+        def self.decode_hex(encoded_key)
+          new(Paseto.decode_hex(encoded_key))
+        end
+
         def initialize(key)
           @key = key
           @nacl = RbNaCl::VerifyKey.new(key)
@@ -70,6 +82,10 @@ module Paseto
 
         def encode64
           Paseto.encode64(@key)
+        end
+
+        def encode_hex
+          Paseto.encode_hex(@key)
         end
 
         def verify(token, footer = nil)
