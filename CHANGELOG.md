@@ -7,6 +7,10 @@
 - Rubocop is the law :oncoming_police_car:
 - Update rake to fix vulnerability CVE-2020-8130
 
+#### 0.4.1 (Mar 13, 2020)
+
+- Add hex encoding support [<a href="https://github.com/mguymon/paseto.rb/pull/11">Pull #10</a> by <a href="https://github.com/shaicoleman">shaicoleman</a>]
+
 ### 0.3 (Dec 4, 2018)
 
 - Use rbnacl instead of rbnacl-libsodium [<a href="https://github.com/mguymon/paseto.rb/pull/6">Pull #3</a> by <a href="https://github.com/smaximov">smaximov</a>]
