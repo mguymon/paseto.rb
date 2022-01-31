@@ -32,10 +32,13 @@ Or install it yourself as:
 
 For all examples:
 
-    require 'paseto'
+```ruby
+require 'paseto'
+```
 
 ## Signing Plaintext Public Messages
 
+```ruby
     Public = Paseto::V2::Public
     key = Public::SecretKey.generate
     token = key.sign('too many secrets')
@@ -43,9 +46,11 @@ For all examples:
     saved_key = key.public_key.encode64 # you can save this string to a db
     decoded_key = Public::PublicKey.decode64(saved_key)
     decoded_key.verify(token) # => 'too many secrets'
+```
 
 ## Encrypting Messages with a Shared Secret
 
+```ruby
     Key = Paseto::V2::Local::Key
     key = Key.generate
     token = key.encrypt('a fancy message')
@@ -53,6 +58,7 @@ For all examples:
     saved_key = key.encode64 # a base64 string representation of the key
     decoded_key = Key.decode64(saved_key)
     decoded_key.decrypt(token) # => 'a fancy message'
+```
 
 ## Using the Message Footer
 
@@ -60,6 +66,7 @@ The message footer is transmitted plaintext, and can be used for key lookup.
 Note that you still must always verify the token via `#decrypt`,  or `#verify`,
 as this also verifies the integrity of the footer:
 
+```ruby
     Local = Paseto::V2::Local
     token = Paseto.parse(raw_data)
     # NOTE: this has not yet been verified! You will always want to call
@@ -70,6 +77,7 @@ as this also verifies the integrity of the footer:
     saved_key = database.find_key(kid) # find the previously stored key
     decoded_key = Local::Key.decode64(saved_key)
     decoded_key.decrypt(token) # => 'too many secrets'
+```
 
 ## Development
 
